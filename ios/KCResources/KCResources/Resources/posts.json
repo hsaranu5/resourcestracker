@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "count": 4,
+  "posts": [
+    {
+      "id": "bundled-bus-fares",
+      "title": "Buses are no longer fare-free",
+      "content": "As of June 1, 2026, RideKC buses charge fares again. Plan for fare money before you travel, or ask about reduced-fare and pass programmes at ridekc.org/fares. If you are walking instead, the Map tab sorts everything by distance from you.",
+      "organization": "KC Resources",
+      "category": "alert",
+      "pinned": true,
+      "createdAt": "2026-06-01T09:00:00-05:00",
+      "expiresAt": null,
+      "resourceId": null
+    },
+    {
+      "id": "bundled-street-sheet",
+      "title": "Street Sheet updated for summer",
+      "content": "The Kansas City Public Library publishes the Street Sheet every quarter. The Summer 2026 edition is the source for most listings in this app. Paper copies are available at Central Library, 14 W 10th Street, third floor, Monday to Friday 9:00am-1:00pm.",
+      "organization": "KC Resources",
+      "category": "update",
+      "pinned": false,
+      "createdAt": "2026-06-15T10:00:00-05:00",
+      "expiresAt": null,
+      "resourceId": "support-central-library"
+    },
+    {
+      "id": "bundled-washington-square",
+      "title": "Washington Square Park dinner — check before going",
+      "content": "The Tuesday evening dinner at Washington Square Park was suspended during the World Cup, which ended on July 19. We have not been able to confirm whether it has resumed. Call ahead or try the Redemptorist Center lunch instead, Monday to Friday 10:00am-1:00pm at 207 Linwood Boulevard.",
+      "organization": "KC Resources",
+      "category": "closure",
+      "pinned": false,
+      "createdAt": "2026-07-20T08:00:00-05:00",
+      "expiresAt": null,
+      "resourceId": "food-washington-square"
+    },
+    {
+      "id": "bundled-id-records",
+      "title": "Help getting an ID or birth certificate",
+      "content": "Three places can help with IDs and vital records. Morning Glory Ministries, 416 W 12th Street, Tuesday to Friday 9:00am-11:00am — bring a homeless or shelter letter. Reconciliation Services, 3101 Troost Avenue, weekdays by appointment. Metropolitan Lutheran Ministry, 3031 Holmes Street, call first. Search “ID” on the Map tab to find them.",
+      "organization": "KC Resources",
+      "category": "update",
+      "pinned": false,
+      "createdAt": "2026-07-18T12:00:00-05:00",
+      "expiresAt": null,
+      "resourceId": "support-morning-glory-ids"
+    }
+  ]
+}
