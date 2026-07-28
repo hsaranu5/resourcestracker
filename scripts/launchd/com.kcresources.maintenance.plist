@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  macOS ONLY — use this instead of the systemd units if you run the server on a
+  Mac rather than the ThinkCentre.
+
+  Weekly maintenance every Monday at 12:05 AM. launchd runs it as soon as the Mac
+  is awake if it was asleep at the scheduled time.
+
+  INSTALL:
+    1. Edit the WorkingDirectory and the two paths below.
+    2. cp scripts/launchd/com.kcresources.maintenance.plist ~/Library/LaunchAgents/
+    3. launchctl load ~/Library/LaunchAgents/com.kcresources.maintenance.plist
+    4. Test now:  launchctl start com.kcresources.maintenance
+       Logs:      cat /tmp/kcresources-maintenance.log
+
+  Weekday key: 0 or 7 = Sunday, 1 = Monday, … 6 = Saturday.
+-->
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.kcresources.maintenance</string>
+
+  <key>ProgramArguments</key>
+  <array>
+    <string>/bin/bash</string>
+    <!-- EDIT: absolute path to the script -->
+    <string>/REPLACE/WITH/PATH/TO/resourcestracker/scripts/weekly-maintenance.sh</string>
+  </array>
+
+  <!-- EDIT: absolute path to the repo -->
+  <key>WorkingDirectory</key>
+  <string>/REPLACE/WITH/PATH/TO/resourcestracker</string>
+
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>RESTART_CMD</key>
+    <!-- Bounces the server LaunchAgent. Only works if you run the server itself
+         under launchd too (com.kcresources.server); otherwise set this to your
+         own restart command, e.g. a pm2 restart. -->
+    <string>launchctl kickstart -k gui/$(id -u)/com.kcresources.server</string>
+  </dict>
+
+  <key>StartCalendarInterval</key>
+  <dict>
+    <key>Weekday</key>
+    <integer>1</integer>
+    <key>Hour</key>
+    <integer>0</integer>
+    <key>Minute</key>
+    <integer>5</integer>
+  </dict>
+
+  <key>StandardOutPath</key>
+  <string>/tmp/kcresources-maintenance.log</string>
+  <key>StandardErrorPath</key>
+  <string>/tmp/kcresources-maintenance.log</string>
+</dict>
+</plist>

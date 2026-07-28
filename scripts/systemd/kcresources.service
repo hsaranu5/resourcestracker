@@ -1,0 +1,101 @@
+# Runs the KC Resources server as an always-on, kernel-sandboxed service.
+#
+# Two jobs:
+#   - keep it running (auto-start on boot, restart on crash)
+#   - wall it off from everything it doesn't need — most importantly the
+#     geometry clinical platform's files — enforced by the kernel, not by the
+#     app behaving well.
+#
+# RECOMMENDED LAYOUT (this file assumes it):
+#   - App code at /srv/kcresources         (owned by the kcresources user)
+#   - Dedicated unprivileged user "kcresources" that owns nothing else
+#   - The geometry platform under a DIFFERENT user, ideally also under /srv
+#
+#   Putting the app under /srv rather than /home is what lets ProtectHome=true
+#   below hide ALL of /home from this process — so even a full code-execution
+#   compromise of this server cannot read files in your home directory, where
+#   the geometry data may live.
+#
+# ONE-TIME SETUP:
+#   sudo useradd --system --home /srv/kcresources --shell /usr/sbin/nologin kcresources
+#   sudo cp -r <your repo> /srv/kcresources
+#   sudo chown -R kcresources:kcresources /srv/kcresources
+#   sudo chmod -R o-rwx /srv/kcresources          # nothing world-readable
+#
+# INSTALL:
+#   sudo cp scripts/systemd/kcresources.service /etc/systemd/system/
+#   # edit the InaccessiblePaths line to point at the geometry directory
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable --now kcresources
+#   systemctl status kcresources
+#
+# VERIFY THE SANDBOX after starting:
+#   systemd-analyze security kcresources     # aim for a low "exposure" score
+
+[Unit]
+Description=KC Resources server
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+
+# Dedicated user; owns only its own app dir. Change if you named it differently.
+User=kcresources
+Group=kcresources
+WorkingDirectory=/srv/kcresources
+ExecStart=/usr/bin/node server/index.js
+
+Environment=NODE_ENV=production
+Environment=PORT=5001
+
+Restart=always
+RestartSec=5
+
+# ── Filesystem isolation ──────────────────────────────────────────────────
+# Whole filesystem is read-only to this process except the paths it must write.
+ProtectSystem=strict
+# The only writable spots: the SQLite DB (server/) and the regenerated events
+# (data/). Everything else, including the rest of the app, is read-only.
+ReadWritePaths=/srv/kcresources/server /srv/kcresources/data
+# Hide ALL home directories from the process. This is the main wall against the
+# geometry data if it lives under /home.
+ProtectHome=true
+# Belt-and-suspenders: name the geometry directory explicitly as off-limits, in
+# case it's ever moved outside /home. EDIT to your real path; harmless if unset.
+InaccessiblePaths=-/srv/geometry-clinical-platform -/home
+# Private /tmp namespace — can't see or tamper with other services' temp files.
+PrivateTmp=true
+
+# ── Privilege & kernel-surface reduction ──────────────────────────────────
+NoNewPrivileges=true
+PrivateDevices=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectKernelLogs=true
+ProtectControlGroups=true
+ProtectClock=true
+ProtectHostname=true
+RestrictNamespaces=true
+RestrictRealtime=true
+RestrictSUIDSGID=true
+LockPersonality=true
+MemoryDenyWriteExecute=true
+# Only the address families the server actually uses.
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+# Drop every Linux capability — a plain Node web server needs none.
+CapabilityBoundingSet=
+# Allowlist of syscall groups; blocks exotic calls used in exploits.
+SystemCallFilter=@system-service
+SystemCallErrorNumber=EPERM
+SystemCallArchitectures=native
+
+# ── Resource caps so one service can't starve the other ───────────────────
+# Tune to the M70's RAM. These keep a runaway (leak, fork bomb, load spike) on
+# this service from taking the geometry platform down with it.
+MemoryMax=512M
+CPUQuota=75%
+TasksMax=256
+
+[Install]
+WantedBy=multi-user.target

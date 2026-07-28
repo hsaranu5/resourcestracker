@@ -1,135 +1,9 @@
 {
-  "version": 1,
-  "count": 22,
+  "generated": "2026-07-24T23:42:32.014Z",
+  "count": 20,
   "events": [
     {
-      "id": "ss-0-2026-07-20",
-      "title": "Free Medical Clinic",
-      "description": "Free medical care for people who are homeless or uninsured. Walk-in, no appointment or insurance needed.",
-      "organization": "Care Beyond the Boulevard",
-      "category": "health",
-      "locationName": "Independence Boulevard Christian Church",
-      "address": "606 Gladstone Boulevard",
-      "city": "Kansas City",
-      "state": "MO",
-      "zipCode": "64124",
-      "startsAt": "2026-07-20T16:00:00-05:00",
-      "endsAt": "2026-07-20T19:00:00-05:00",
-      "status": "scheduled",
-      "cancellationNote": "",
-      "contactPhone": "(913) 291-2273",
-      "resourceId": null,
-      "mappable": true,
-      "latitude": 39.113626,
-      "longitude": -94.544034
-    },
-    {
-      "id": "ss-1-2026-07-22",
-      "title": "Veterans Commissary",
-      "description": "Food, hygiene supplies and support for veterans. Fourth Wednesday of the month.",
-      "organization": "Veterans Community Project",
-      "category": "veterans",
-      "locationName": "Veterans Community Project Welcome Center",
-      "address": "8827 Troost Avenue",
-      "city": "Kansas City",
-      "state": "MO",
-      "zipCode": "64131",
-      "startsAt": "2026-07-22T09:00:00-05:00",
-      "endsAt": "2026-07-22T15:00:00-05:00",
-      "status": "scheduled",
-      "cancellationNote": "",
-      "contactPhone": "(816) 599-6503",
-      "resourceId": null,
-      "mappable": true,
-      "latitude": 38.967359,
-      "longitude": -94.576713
-    },
-    {
-      "id": "ss-2-2026-07-22",
-      "title": "Coffee & Conversation",
-      "description": "Coffee, snacks, and direct access to resources and personal care items. Note: the library's regular Community Resources desk is closed on this day.",
-      "organization": "Kansas City Public Library",
-      "category": "support",
-      "locationName": "Central Library, Third Floor",
-      "address": "14 W 10th Street",
-      "city": "Kansas City",
-      "state": "MO",
-      "zipCode": "64105",
-      "startsAt": "2026-07-22T10:30:00-05:00",
-      "endsAt": "2026-07-22T11:30:00-05:00",
-      "status": "scheduled",
-      "cancellationNote": "",
-      "contactPhone": "(816) 701-3767",
-      "resourceId": null,
-      "mappable": true,
-      "latitude": 39.102581,
-      "longitude": -94.583883
-    },
-    {
-      "id": "ss-3-2026-07-22",
-      "title": "Evening Clinic",
-      "description": "Wednesday evening pantry.",
-      "organization": "St. Paul's Episcopal Church",
-      "category": "food",
-      "locationName": "St. Paul's Episcopal Church",
-      "address": "40th & Main Street",
-      "city": "Kansas City",
-      "state": "MO",
-      "zipCode": "64111",
-      "startsAt": "2026-07-22T17:30:00-05:00",
-      "endsAt": "2026-07-22T19:30:00-05:00",
-      "status": "scheduled",
-      "cancellationNote": "",
-      "contactPhone": "(816) 931-2850",
-      "resourceId": null,
-      "mappable": false,
-      "latitude": null,
-      "longitude": null
-    },
-    {
-      "id": "ss-4-2026-07-23",
-      "title": "Swope Mobile Medical Unit",
-      "description": "Mobile medical unit stops at the Hope Faith campus. The Street Sheet says every other Thursday but does not say which \u2014 confirm before travelling.\n\nThis schedule could not be confirmed from the source \u2014 call before travelling.",
-      "organization": "Swope Health",
-      "category": "health",
-      "locationName": "Hope Faith Homeless Assistance Campus",
-      "address": "705 Virginia Avenue",
-      "city": "Kansas City",
-      "state": "MO",
-      "zipCode": "64106",
-      "startsAt": "2026-07-23T09:00:00-05:00",
-      "endsAt": "2026-07-23T12:00:00-05:00",
-      "status": "scheduled",
-      "cancellationNote": "",
-      "contactPhone": "(816) 599-5480",
-      "resourceId": null,
-      "mappable": true,
-      "latitude": 39.104098,
-      "longitude": -94.565916
-    },
-    {
-      "id": "ss-5-2026-07-23",
-      "title": "Evening Medical Clinic",
-      "description": "Thursday evening clinic at Cherith Brook.",
-      "organization": "Care Beyond the Boulevard",
-      "category": "health",
-      "locationName": "Cherith Brook Catholic Worker",
-      "address": "3226 E 12th Street",
-      "city": "Kansas City",
-      "state": "MO",
-      "zipCode": "64127",
-      "startsAt": "2026-07-23T17:00:00-05:00",
-      "endsAt": "2026-07-23T18:30:00-05:00",
-      "status": "scheduled",
-      "cancellationNote": "",
-      "contactPhone": "(913) 291-2273",
-      "resourceId": null,
-      "mappable": true,
-      "latitude": 39.098759,
-      "longitude": -94.543238
-    },
-    {
-      "id": "ss-6-2026-07-25",
+      "id": "213d49e2f2aa67f8",
       "title": "Free Medical Clinic (Saturday)",
       "description": "Saturday morning free medical clinic. Walk-in.",
       "organization": "Care Beyond the Boulevard",
@@ -150,7 +24,7 @@
       "longitude": -94.544034
     },
     {
-      "id": "ss-7-2026-07-25",
+      "id": "16a6f4491eb5fbc0",
       "title": "Food Pantry & Personal Care",
       "description": "Food pantry and personal care items on the south side of the church.",
       "organization": "St. Paul's Episcopal Church",
@@ -166,12 +40,10 @@
       "cancellationNote": "",
       "contactPhone": "(816) 931-2850",
       "resourceId": null,
-      "mappable": false,
-      "latitude": null,
-      "longitude": null
+      "mappable": false
     },
     {
-      "id": "ss-8-2026-07-27",
+      "id": "b3e4ab6bfed09a89",
       "title": "Free Medical Clinic",
       "description": "Free medical care for people who are homeless or uninsured. Walk-in, no appointment or insurance needed.",
       "organization": "Care Beyond the Boulevard",
@@ -192,7 +64,7 @@
       "longitude": -94.544034
     },
     {
-      "id": "ss-9-2026-07-28",
+      "id": "d2f36d19e49da4ca",
       "title": "Free Medical Clinic",
       "description": "Morning clinic at Cherith Brook, second and fourth Tuesdays only.",
       "organization": "Care Beyond the Boulevard",
@@ -213,7 +85,7 @@
       "longitude": -94.543238
     },
     {
-      "id": "ss-10-2026-07-29",
+      "id": "19e05f4145406464",
       "title": "Evening Clinic",
       "description": "Wednesday evening pantry.",
       "organization": "St. Paul's Episcopal Church",
@@ -229,12 +101,10 @@
       "cancellationNote": "",
       "contactPhone": "(816) 931-2850",
       "resourceId": null,
-      "mappable": false,
-      "latitude": null,
-      "longitude": null
+      "mappable": false
     },
     {
-      "id": "ss-11-2026-07-30",
+      "id": "0f8d325d7368d225",
       "title": "Evening Medical Clinic",
       "description": "Thursday evening clinic at Cherith Brook.",
       "organization": "Care Beyond the Boulevard",
@@ -255,7 +125,7 @@
       "longitude": -94.543238
     },
     {
-      "id": "ss-12-2026-08-01",
+      "id": "1ff98d0a183f915c",
       "title": "Free Medical Clinic (Saturday)",
       "description": "Saturday morning free medical clinic. Walk-in.",
       "organization": "Care Beyond the Boulevard",
@@ -276,8 +146,8 @@
       "longitude": -94.544034
     },
     {
-      "id": "ss-13-2026-08-01",
-      "title": "Street Outreach \u2014 Supplies Giveaway",
+      "id": "44a9ae3fa960c4c0",
+      "title": "Street Outreach — Supplies Giveaway",
       "description": "Backpacks, sleeping bags, sack lunches and clothes. First Saturday of the month.",
       "organization": "Street Support KC",
       "category": "support",
@@ -297,7 +167,7 @@
       "longitude": -94.584264
     },
     {
-      "id": "ss-14-2026-08-01",
+      "id": "8ba34e7e86faec28",
       "title": "Food Pantry & Personal Care",
       "description": "Food pantry and personal care items on the south side of the church.",
       "organization": "St. Paul's Episcopal Church",
@@ -313,12 +183,10 @@
       "cancellationNote": "",
       "contactPhone": "(816) 931-2850",
       "resourceId": null,
-      "mappable": false,
-      "latitude": null,
-      "longitude": null
+      "mappable": false
     },
     {
-      "id": "ss-15-2026-08-03",
+      "id": "96bed3f5eceaae94",
       "title": "Free Medical Clinic",
       "description": "Free medical care for people who are homeless or uninsured. Walk-in, no appointment or insurance needed.",
       "organization": "Care Beyond the Boulevard",
@@ -339,7 +207,7 @@
       "longitude": -94.544034
     },
     {
-      "id": "ss-16-2026-08-05",
+      "id": "8b0a935c84b7c479",
       "title": "Evening Clinic",
       "description": "Wednesday evening pantry.",
       "organization": "St. Paul's Episcopal Church",
@@ -355,14 +223,12 @@
       "cancellationNote": "",
       "contactPhone": "(816) 931-2850",
       "resourceId": null,
-      "mappable": false,
-      "latitude": null,
-      "longitude": null
+      "mappable": false
     },
     {
-      "id": "ss-17-2026-08-06",
+      "id": "d6a84dec4303db9a",
       "title": "Swope Mobile Medical Unit",
-      "description": "Mobile medical unit stops at the Hope Faith campus. The Street Sheet says every other Thursday but does not say which \u2014 confirm before travelling.\n\nThis schedule could not be confirmed from the source \u2014 call before travelling.",
+      "description": "Mobile medical unit stops at the Hope Faith campus. The Street Sheet says every other Thursday but does not say which — confirm before travelling.",
       "organization": "Swope Health",
       "category": "health",
       "locationName": "Hope Faith Homeless Assistance Campus",
@@ -381,7 +247,7 @@
       "longitude": -94.565916
     },
     {
-      "id": "ss-18-2026-08-06",
+      "id": "cb1ca90aadf93a91",
       "title": "Evening Medical Clinic",
       "description": "Thursday evening clinic at Cherith Brook.",
       "organization": "Care Beyond the Boulevard",
@@ -402,7 +268,7 @@
       "longitude": -94.543238
     },
     {
-      "id": "ss-19-2026-08-08",
+      "id": "c82c029daa01e143",
       "title": "Free Medical Clinic (Saturday)",
       "description": "Saturday morning free medical clinic. Walk-in.",
       "organization": "Care Beyond the Boulevard",
@@ -423,7 +289,7 @@
       "longitude": -94.544034
     },
     {
-      "id": "ss-20-2026-08-08",
+      "id": "cc3a6cb583337309",
       "title": "Food Pantry & Personal Care",
       "description": "Food pantry and personal care items on the south side of the church.",
       "organization": "St. Paul's Episcopal Church",
@@ -439,12 +305,10 @@
       "cancellationNote": "",
       "contactPhone": "(816) 931-2850",
       "resourceId": null,
-      "mappable": false,
-      "latitude": null,
-      "longitude": null
+      "mappable": false
     },
     {
-      "id": "ss-21-2026-08-08",
+      "id": "9453b70dac39020a",
       "title": "Mobile Food Pantry",
       "description": "Mobile food pantry alongside the Saturday clinic. Second Saturday of the month only.",
       "organization": "Care Beyond the Boulevard",
@@ -463,6 +327,88 @@
       "mappable": true,
       "latitude": 39.113626,
       "longitude": -94.544034
+    },
+    {
+      "id": "b8aa9949da2dc048",
+      "title": "Free Medical Clinic",
+      "description": "Free medical care for people who are homeless or uninsured. Walk-in, no appointment or insurance needed.",
+      "organization": "Care Beyond the Boulevard",
+      "category": "health",
+      "locationName": "Independence Boulevard Christian Church",
+      "address": "606 Gladstone Boulevard",
+      "city": "Kansas City",
+      "state": "MO",
+      "zipCode": "64124",
+      "startsAt": "2026-08-10T16:00:00-05:00",
+      "endsAt": "2026-08-10T19:00:00-05:00",
+      "status": "scheduled",
+      "cancellationNote": "",
+      "contactPhone": "(913) 291-2273",
+      "resourceId": null,
+      "mappable": true,
+      "latitude": 39.113626,
+      "longitude": -94.544034
+    },
+    {
+      "id": "d46f243f5ba96467",
+      "title": "Free Medical Clinic",
+      "description": "Morning clinic at Cherith Brook, second and fourth Tuesdays only.",
+      "organization": "Care Beyond the Boulevard",
+      "category": "health",
+      "locationName": "Cherith Brook Catholic Worker",
+      "address": "3226 E 12th Street",
+      "city": "Kansas City",
+      "state": "MO",
+      "zipCode": "64127",
+      "startsAt": "2026-08-11T08:30:00-05:00",
+      "endsAt": "2026-08-11T10:30:00-05:00",
+      "status": "scheduled",
+      "cancellationNote": "",
+      "contactPhone": "(913) 291-2273",
+      "resourceId": null,
+      "mappable": true,
+      "latitude": 39.098759,
+      "longitude": -94.543238
+    },
+    {
+      "id": "cd968eb2684d375e",
+      "title": "Evening Clinic",
+      "description": "Wednesday evening pantry.",
+      "organization": "St. Paul's Episcopal Church",
+      "category": "food",
+      "locationName": "St. Paul's Episcopal Church",
+      "address": "40th & Main Street",
+      "city": "Kansas City",
+      "state": "MO",
+      "zipCode": "64111",
+      "startsAt": "2026-08-12T17:30:00-05:00",
+      "endsAt": "2026-08-12T19:30:00-05:00",
+      "status": "scheduled",
+      "cancellationNote": "",
+      "contactPhone": "(816) 931-2850",
+      "resourceId": null,
+      "mappable": false
+    },
+    {
+      "id": "ab151fe96ae92fcb",
+      "title": "Evening Medical Clinic",
+      "description": "Thursday evening clinic at Cherith Brook.",
+      "organization": "Care Beyond the Boulevard",
+      "category": "health",
+      "locationName": "Cherith Brook Catholic Worker",
+      "address": "3226 E 12th Street",
+      "city": "Kansas City",
+      "state": "MO",
+      "zipCode": "64127",
+      "startsAt": "2026-08-13T17:00:00-05:00",
+      "endsAt": "2026-08-13T18:30:00-05:00",
+      "status": "scheduled",
+      "cancellationNote": "",
+      "contactPhone": "(913) 291-2273",
+      "resourceId": null,
+      "mappable": true,
+      "latitude": 39.098759,
+      "longitude": -94.543238
     }
   ]
 }

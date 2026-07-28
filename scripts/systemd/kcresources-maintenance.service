@@ -1,0 +1,51 @@
+# Weekly maintenance (one-shot), paired with kcresources-maintenance.timer.
+#
+# Rolls the events window, prunes + compacts the DB, then restarts the server.
+#
+# Ownership subtlety this design gets right: the DB work runs as the SAME
+# unprivileged user that owns the SQLite file (kcresources), so the file never
+# becomes root-owned — which would otherwise lock the main service out of its
+# own database. The restart alone needs privilege, so it runs via ExecStartPost
+# with a "+" prefix, which systemd executes as root regardless of User=.
+#
+# INSTALL: copy this and the .timer into /etc/systemd/system/, then:
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable --now kcresources-maintenance.timer
+#   systemctl list-timers kcresources-maintenance
+#
+# Test now, without waiting for Monday:
+#   sudo systemctl start kcresources-maintenance.service
+#   journalctl -u kcresources-maintenance -n 40
+
+[Unit]
+Description=KC Resources weekly maintenance (prune, archive, roll events, restart)
+After=network-online.target
+
+[Service]
+Type=oneshot
+
+User=kcresources
+Group=kcresources
+WorkingDirectory=/srv/kcresources
+
+# Data work as the unprivileged user. RESTART_CMD is intentionally NOT set here —
+# the restart is handled by ExecStartPost below, so file ownership stays clean.
+ExecStart=/usr/bin/env bash scripts/weekly-maintenance.sh
+
+# Runs as root ("+"), after the data work succeeds. This is the only privileged
+# step, and it does exactly one thing.
+ExecStartPost=+/bin/systemctl restart kcresources
+
+# Same filesystem sandbox as the main service — it touches the same two dirs.
+ProtectSystem=strict
+ReadWritePaths=/srv/kcresources/server /srv/kcresources/data
+ProtectHome=true
+InaccessiblePaths=-/srv/geometry-clinical-platform -/home
+PrivateTmp=true
+NoNewPrivileges=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+# Note: no CapabilityBoundingSet= wipe here, because ExecStartPost needs to
+# reach systemd to trigger the restart.

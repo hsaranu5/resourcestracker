@@ -91,20 +91,53 @@ const createTables = () => {
   `);
   db.run('CREATE INDEX IF NOT EXISTS idx_events_starts_at ON events(starts_at)');
 
-  // API tokens for verified organisations. Only holders of a token can publish
-  // events or posts; end users of the app read only. That keeps an open feed
-  // aimed at people in crisis from becoming a channel for scams.
+  // --- Verified poster auth (see design/VERIFIED-POSTER-AUTH.md) ---
+  //
+  // No passwords, no pre-created accounts: the allowlist IS the account system.
+  // Care Beyond adds trusted org emails; login is a 6-digit code sent to that
+  // email. Removing a row revokes access instantly.
+
+  // Who may post. `org_name` is stamped onto posts server-side — never taken
+  // from client input.
   db.run(`
-    CREATE TABLE IF NOT EXISTS org_api_tokens (
+    CREATE TABLE IF NOT EXISTS allowlist (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
-      token TEXT NOT NULL UNIQUE,
-      organization TEXT NOT NULL,
-      contact_email TEXT,
-      active INTEGER NOT NULL DEFAULT 1,
+      email TEXT NOT NULL UNIQUE COLLATE NOCASE,
+      org_name TEXT NOT NULL,
+      added_by TEXT,
+      added_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+
+  // Short-lived login codes. Only the hash is stored; codes expire in 10
+  // minutes and allow a handful of attempts before burning out.
+  db.run(`
+    CREATE TABLE IF NOT EXISTS auth_codes (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      email TEXT NOT NULL COLLATE NOCASE,
+      code_hash TEXT NOT NULL,
+      expires_at TEXT NOT NULL,
+      attempts INTEGER NOT NULL DEFAULT 0,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+  db.run('CREATE INDEX IF NOT EXISTS idx_auth_codes_email ON auth_codes(email)');
+
+  // Sessions issued after a correct code. Token hashes only — a leaked
+  // database must not yield usable sessions. Default lifetime is hours;
+  // 30 days only when the poster explicitly opted in ("remember this device").
+  db.run(`
+    CREATE TABLE IF NOT EXISTS sessions (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      token_hash TEXT NOT NULL UNIQUE,
+      email TEXT NOT NULL COLLATE NOCASE,
+      org_name TEXT NOT NULL,
+      expires_at TEXT NOT NULL,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       last_used_at DATETIME
     )
   `);
+  db.run('CREATE INDEX IF NOT EXISTS idx_sessions_expires ON sessions(expires_at)');
 
   // Organizations table
   db.run(`
@@ -140,20 +173,34 @@ const migrateResources = () => {
       return;
     }
     const existing = new Set(rows.map((r) => r.name));
+    const missing = Object.entries(columns).filter(([column]) => !existing.has(column));
 
-    Object.entries(columns).forEach(([column, type]) => {
-      if (existing.has(column)) return;
-      db.run(`ALTER TABLE resources ADD COLUMN ${column} ${type}`, (alterErr) => {
-        if (alterErr) {
-          console.error(`Failed adding column ${column}:`, alterErr.message);
-        } else {
-          console.log(`Added resources.${column}`);
-        }
+    // The index can only be created after the ALTERs have run — creating it
+    // while the slug column is still being added crashed the process on a
+    // fresh database. Count the ALTERs down, then index, with an error
+    // callback so a failure logs instead of emitting an unhandled 'error'.
+    let pending = missing.length;
+    const createSlugIndex = () => {
+      // Unique slug lets the seeder upsert instead of duplicating on every run.
+      db.run('CREATE UNIQUE INDEX IF NOT EXISTS idx_resources_slug ON resources(slug)', (idxErr) => {
+        if (idxErr) console.error('Could not create slug index:', idxErr.message);
       });
-    });
+    };
 
-    // Unique slug lets the seeder upsert instead of duplicating on every run.
-    db.run('CREATE UNIQUE INDEX IF NOT EXISTS idx_resources_slug ON resources(slug)');
+    if (pending === 0) {
+      createSlugIndex();
+    } else {
+      missing.forEach(([column, type]) => {
+        db.run(`ALTER TABLE resources ADD COLUMN ${column} ${type}`, (alterErr) => {
+          if (alterErr) {
+            console.error(`Failed adding column ${column}:`, alterErr.message);
+          } else {
+            console.log(`Added resources.${column}`);
+          }
+          if (--pending === 0) createSlugIndex();
+        });
+      });
+    }
   });
 
   migrateCommunityPosts();

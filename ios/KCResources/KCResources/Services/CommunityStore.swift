@@ -245,6 +245,56 @@ final class CommunityStore: ObservableObject {
         return data
     }
 
+    // MARK: - Publishing (verified orgs only)
+
+    /// A field-level validation or server error, surfaced to the composer.
+    struct PublishError: LocalizedError {
+        let message: String
+        var errorDescription: String? { message }
+    }
+
+    /// Posts a new event. `token` comes from `OrgSession`; the server derives the
+    /// organisation from the session, so the client never sends it.
+    func createEvent(_ body: [String: Any], token: String) async throws {
+        guard let url = ServerConfig.communityURL(path: "events")?.url else {
+            throw PublishError(message: "No server is configured.")
+        }
+        try await publish(url, body: body, token: token)
+        await refresh()
+    }
+
+    func createPost(_ body: [String: Any], token: String) async throws {
+        guard let url = ServerConfig.communityURL(path: "posts")?.url else {
+            throw PublishError(message: "No server is configured.")
+        }
+        try await publish(url, body: body, token: token)
+        await refresh()
+    }
+
+    private func publish(_ url: URL, body: [String: Any], token: String) async throws {
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        request.httpBody = try JSONSerialization.data(withJSONObject: body)
+        request.timeoutInterval = 20
+
+        let (data, response) = try await URLSession.shared.data(for: request)
+        guard let http = response as? HTTPURLResponse else {
+            throw PublishError(message: "No response from the server.")
+        }
+        guard (200..<300).contains(http.statusCode) else {
+            // Surface the server's own validation message where we can — it's
+            // more specific than anything we'd invent ("endsAt cannot be before
+            // startsAt", "Session expired. Sign in again.").
+            let serverMessage = (try? JSONDecoder().decode([String: String].self, from: data))?["error"]
+            if http.statusCode == 401 {
+                throw PublishError(message: serverMessage ?? "Your session expired. Sign in again.")
+            }
+            throw PublishError(message: serverMessage ?? "Couldn't publish (error \(http.statusCode)).")
+        }
+    }
+
     // MARK: - Querying
 
     /// Upcoming and in-progress events, grouped by day. Events that have finished

@@ -4,6 +4,7 @@ import SwiftUI
 struct CommunityView: View {
     @EnvironmentObject private var community: CommunityStore
     @EnvironmentObject private var locationManager: LocationManager
+    @EnvironmentObject private var session: OrgSession
 
     @AppStorage("radiusMiles") private var radiusMiles: Double = 5
 
@@ -16,6 +17,8 @@ struct CommunityView: View {
 
     @State private var segment: Segment = .events
     @State private var selectedCategories: Set<ResourceCategory> = []
+    @State private var showingSignIn = false
+    @State private var showingCompose = false
 
     private var days: [EventDay] {
         community.upcomingByDay(categories: selectedCategories)
@@ -43,12 +46,36 @@ struct CommunityView: View {
             .background(Color(.systemGroupedBackground))
             .navigationTitle("Community")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) { publishButton }
+            }
             .refreshable { await refresh() }
             .task {
                 // Only hit the network if we have nothing or the cache has aged out.
                 if !community.hasEverLoaded || community.isStale {
                     await refresh()
                 }
+            }
+            .sheet(isPresented: $showingSignIn) { OrgSignInSheet() }
+            .sheet(isPresented: $showingCompose) {
+                ComposeSheet(initialKind: segment == .events ? .event : .post)
+            }
+        }
+    }
+
+    /// Publishing entry point. Only shown when a server is configured — with no
+    /// backend there's nowhere to post to, so the button would be a dead end.
+    @ViewBuilder
+    private var publishButton: some View {
+        if ServerConfig.isConfigured {
+            if session.isSignedIn {
+                Button {
+                    showingCompose = true
+                } label: {
+                    Label("New", systemImage: "square.and.pencil")
+                }
+            } else {
+                Button("Post") { showingSignIn = true }
             }
         }
     }

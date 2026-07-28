@@ -119,9 +119,19 @@ final class ResourceStore: ObservableObject {
 
     // MARK: - Optional server sync
 
+    /// The offline copy saved to disk is trimmed to this radius around the
+    /// user. A shop in California is useless to someone in Kansas — what's
+    /// worth keeping on standby for a wifi outage is the walkable/drivable
+    /// area. Entries with no coordinates (hotlines, text lines) always stay.
+    static let offlineCacheRadiusMiles: Double = 15
+
     /// Pulls an updated dataset from the Express backend, if `ServerConfig.baseURL` is set.
-    /// Failure is non-fatal — the bundled data keeps working offline.
-    func syncFromServer() async {
+    /// Failure is non-fatal — the cached/bundled data keeps working offline.
+    ///
+    /// The full dataset is used in memory for this session; what's *saved* for
+    /// offline standby is capped to `offlineCacheRadiusMiles` of `location`
+    /// (or uncapped when no location fix is available yet).
+    func syncFromServer(near location: CLLocation? = nil) async {
         guard let url = ServerConfig.resourcesURL else { return }
         syncError = nil
         do {
@@ -141,11 +151,25 @@ final class ResourceStore: ObservableObject {
 
             resources = payload.resources
             applyGeocodeCache()
-            try? data.write(to: remoteCacheURL, options: .atomic)
+            writeOfflineCache(payload, near: location)
             lastSync = Date()
             await geocodeMissingIfNeeded()
         } catch {
             syncError = "Couldn't reach the server. Showing saved resources."
+        }
+    }
+
+    private func writeOfflineCache(_ payload: ResourcePayload, near location: CLLocation?) {
+        var capped = payload
+        if let location {
+            capped.resources = payload.resources.filter { resource in
+                guard let resourceLocation = resource.location else { return true }
+                let miles = location.distance(from: resourceLocation) / 1609.344
+                return miles <= Self.offlineCacheRadiusMiles
+            }
+        }
+        if let data = try? JSONEncoder().encode(capped) {
+            try? data.write(to: remoteCacheURL, options: .atomic)
         }
     }
 

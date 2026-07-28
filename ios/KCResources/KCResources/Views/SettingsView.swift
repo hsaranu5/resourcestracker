@@ -4,6 +4,9 @@ struct SettingsView: View {
     @EnvironmentObject private var store: ResourceStore
     @EnvironmentObject private var community: CommunityStore
     @EnvironmentObject private var locationManager: LocationManager
+    @EnvironmentObject private var session: OrgSession
+
+    @State private var showingSignIn = false
 
     var body: some View {
         NavigationStack {
@@ -55,7 +58,7 @@ struct SettingsView: View {
                         Text(syncError).font(.caption).foregroundStyle(.secondary)
                     }
                     if ServerConfig.isConfigured {
-                        Button("Sync now") { Task { await store.syncFromServer() } }
+                        Button("Sync now") { Task { await store.syncFromServer(near: locationManager.location) } }
                     }
                 } header: {
                     Text("Resource data")
@@ -78,6 +81,25 @@ struct SettingsView: View {
                     Text("Only verified local organisations can publish events and posts. The app is read-only, which keeps a feed used by people in crisis from becoming a channel for scams.")
                 }
 
+                if ServerConfig.isConfigured {
+                    Section {
+                        switch session.state {
+                        case .signedIn(let org, let email):
+                            LabeledContent("Signed in as", value: org)
+                            Text(email).font(.caption).foregroundStyle(.secondary)
+                            Button("Sign out", role: .destructive) {
+                                Task { await session.signOut() }
+                            }
+                        default:
+                            Button("Sign in to post") { showingSignIn = true }
+                        }
+                    } header: {
+                        Text("Organization posting")
+                    } footer: {
+                        Text("Verified outreach organizations can publish events and posts. Sign-in is by email code — no password.")
+                    }
+                }
+
                 Section {
                     Text("Primary source: Kansas City Public Library Street Sheet (Summer 2026), published quarterly at kclibrary.org/outreach. Supplemented by the KCPD Community Resource Guide, findfoodpantry.org and provider websites.")
                         .font(.callout)
@@ -91,6 +113,7 @@ struct SettingsView: View {
             }
             .navigationTitle("Settings")
             .navigationBarTitleDisplayMode(.inline)
+            .sheet(isPresented: $showingSignIn) { OrgSignInSheet() }
         }
     }
 }

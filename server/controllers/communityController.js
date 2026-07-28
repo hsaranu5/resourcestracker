@@ -10,6 +10,16 @@ const slugify = (text) =>
 
 const isValidDate = (value) => value && !Number.isNaN(Date.parse(value));
 
+// Lazy require to avoid a circular dependency (communityExport uses toEvent/toPost).
+// Keeps /data/*.json in sync whenever a verified org publishes or amends.
+const syncDataFolder = () => {
+  try {
+    require('../communityExport').exportCommunity();
+  } catch (e) {
+    console.error('Could not sync /data:', e.message);
+  }
+};
+
 const toEvent = (row) => {
   const event = {
     id: row.slug || String(row.id),
@@ -173,6 +183,7 @@ const createEvent = (req, res) => {
           return;
         }
         res.status(201).json(toEvent(row));
+        syncDataFolder();
       });
     }
   );
@@ -232,6 +243,7 @@ const updateEvent = (req, res) => {
             return;
           }
           res.json(toEvent(fresh));
+          syncDataFolder();
         });
       }
     );
@@ -292,7 +304,11 @@ const createPost = (req, res) => {
     [
       String(title).trim(), String(content).trim(), req.organization, req.organization,
       category || 'update', pinned ? 1 : 0,
-      expiresAt ? new Date(expiresAt).toISOString() : null,
+      // Posts don't linger: a week by default, unless the org sets its own
+      // expiry. Stale information costs someone a walk across town.
+      expiresAt
+        ? new Date(expiresAt).toISOString()
+        : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
       resourceId || null
     ],
     function (err) {
@@ -306,6 +322,7 @@ const createPost = (req, res) => {
           return;
         }
         res.status(201).json(toPost(row));
+        syncDataFolder();
       });
     }
   );

@@ -11,7 +11,7 @@ A comprehensive application for tracking homelessness resources including food, 
   - Filter by resource type (food, clothing, shelter, medical, other)
   - Distance-based results with radius search
 - **Resource Management**: Add, view, and manage resources with full details
-- **Community Section**: Community members can create and view posts sharing information
+- **Community Section**: Everyone can read posts; publishing is limited to organizations verified by Care Beyond, who sign in with a one-time email code (no passwords — see `design/VERIFIED-POSTER-AUTH.md`). Manage who can post with `node server/manageAllowlist.js --add <email> "<Org name>"`. In development, sign-in codes print to the server console; set `EMAIL_MODE=provider` and configure `server/mailer.js` before launch.
 - **Organization Tracking**: Track organizations that provide resources
 
 ## Tech Stack

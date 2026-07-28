@@ -1,0 +1,22 @@
+# Fires the weekly maintenance job every Monday at 12:05 AM.
+#
+# OnCalendar format: DayOfWeek Year-Month-Day Hour:Minute:Second
+#   Mon *-*-* 00:05:00  = every Monday at 00:05 local time.
+#
+# To change the day, swap "Mon" (Sun, Tue, Wed, … or "*-*-*" with no day for
+# daily). Verify how systemd reads any expression with:
+#   systemd-analyze calendar "Mon *-*-* 00:05:00"
+
+[Unit]
+Description=Weekly KC Resources maintenance schedule
+
+[Timer]
+OnCalendar=Mon *-*-* 00:05:00
+
+# If the box was asleep or off at 12:05, run as soon as it's back rather than
+# skipping the week entirely. Important for a home server that isn't 24/7.
+Persistent=true
+
+# Uses local time (the box's timezone), so "00:05" means midnight where you are.
+[Install]
+WantedBy=timers.target

@@ -1,0 +1,17 @@
+{
+  "generated": "2026-07-24T23:42:32.014Z",
+  "count": 1,
+  "posts": [
+    {
+      "id": "1",
+      "title": "Fire BBQ",
+      "content": "Meat!",
+      "organization": "Meo Jet",
+      "category": "alert",
+      "pinned": false,
+      "createdAt": "2026-07-24 23:42:32",
+      "expiresAt": "2026-07-31T23:42:32.009Z",
+      "resourceId": null
+    }
+  ]
+}
