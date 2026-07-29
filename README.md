@@ -37,13 +37,23 @@ A comprehensive application for tracking homelessness resources including food, 
    npm run install-all
    ```
 
-3. **Set up environment variables** (optional):
+3. **Set up environment variables**:
    ```bash
    cp .env.example .env
    ```
-   Edit `.env` if you need to change the port (default is 5000)
+   Edit `.env` to change the port (default 5001) or to turn on real email delivery
+   (see [Email delivery](#email-delivery) below).
 
-4. **Start the development servers**:
+4. **Seed the database** — required, and easy to miss:
+   ```bash
+   npm run seed
+   ```
+   `resources.db` is gitignored, so a fresh clone starts with an empty database
+   and the map will show no locations until this is run. The seed loads the 116
+   resources from `data/resources.json`; it matches on `slug`, so re-running it
+   updates rows instead of duplicating them.
+
+5. **Start the development servers**:
    ```bash
    npm run dev
    ```
@@ -60,13 +70,53 @@ A comprehensive application for tracking homelessness resources including food, 
    npm run client
    ```
 
-5. **Open your browser** and navigate to `http://localhost:3000`
+6. **Open your browser** and navigate to `http://localhost:3000`
 
    The application should now be running! You'll see:
    - A map view with sample resources (if you ran the seed script)
    - Search functionality in the sidebar
    - Community posts section
    - Ability to add new resources
+
+## Email delivery
+
+Verified organisations sign in with a 6-digit code sent to their email. Delivery
+is controlled entirely by `.env` — `server/mailer.js` never needs editing.
+
+| `EMAIL_MODE` | Behaviour |
+|---|---|
+| `console` (default) | Codes print to the server terminal. Good for local development. |
+| `smtp` | Codes are emailed over SMTP. |
+
+### Using Gmail (interim, before the real domain)
+
+Gmail requires an **App Password** — the normal account password is rejected.
+
+1. Enable 2-Step Verification on the Google account.
+2. Generate an App Password at <https://myaccount.google.com/apppasswords>.
+3. In `.env`:
+   ```
+   EMAIL_MODE=smtp
+   SMTP_HOST=smtp.gmail.com
+   SMTP_PORT=587
+   SMTP_USER=youraddress@gmail.com
+   SMTP_PASS=abcdefghijklmnop
+   MAIL_FROM="Care Beyond <youraddress@gmail.com>"
+   ```
+   Gmail rewrites the `From` header to the authenticated account, so the address
+   in `MAIL_FROM` must match `SMTP_USER`.
+4. Confirm it works before relying on it:
+   ```bash
+   npm run test-mail -- you@example.com
+   ```
+   This validates the credentials, then sends one message with a dummy code.
+
+Restart the server after changing `.env` — env vars are read at boot.
+
+**Gmail limits**: roughly 500 messages per day, and Google may flag the account
+if volume spikes. Fine for a pilot with a handful of verified orgs; move to a
+transactional provider (Resend, SendGrid, Postmark) once the domain exists. That
+migration is only a change of `SMTP_HOST` / `SMTP_USER` / `SMTP_PASS` / `MAIL_FROM`.
 
 ## Usage
 
