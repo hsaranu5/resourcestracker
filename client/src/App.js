@@ -18,7 +18,13 @@ const API_URL = process.env.REACT_APP_API_URL || '/api';
 const RADII = [1, 3, 5, 10, 25];
 
 function App() {
-  const [theme, setTheme] = useState(() => localStorage.getItem('theme') || 'dark');
+  const [theme, setTheme] = useState(() => {
+    try {
+      const saved = localStorage.getItem('theme');
+      if (saved === 'light' || saved === 'dark') return saved;
+    } catch (e) { /* storage unavailable (private mode) */ }
+    return 'light';
+  });
   const [activeTab, setActiveTab] = useState('map');
   const [communityView, setCommunityView] = useState('events');
   const [resources, setResources] = useState([]);
@@ -34,7 +40,11 @@ function App() {
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
-    localStorage.setItem('theme', theme);
+    const meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.setAttribute('content', theme === 'dark' ? '#000000' : '#eef0f4');
+    try {
+      localStorage.setItem('theme', theme);
+    } catch (e) { /* storage unavailable (private mode) */ }
   }, [theme]);
 
   useEffect(() => {
