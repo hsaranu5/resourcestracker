@@ -46,6 +46,73 @@ body {
   color: var(--text);
 }
 
+/* ---------- Find: default (results lead) ----------
+   One column, capped so lines stay readable on a wide screen. The controls
+   stick to the top; the map scrolls away with everything else, because its
+   job here is a first impression of where things are, not navigation. */
+.find-column {
+  flex: 1;
+  overflow-y: auto;
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 0 24px;
+  background: var(--panel);
+  border-left: 1px solid var(--border);
+  border-right: 1px solid var(--border);
+}
+
+.find-head {
+  position: sticky;
+  top: 0;
+  z-index: 500;
+  display: flex;
+  align-items: stretch;
+  gap: 4px;
+  background: var(--panel);
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 6px;
+}
+
+.find-controls {
+  flex: 1;
+  min-width: 0;
+}
+
+.minimap {
+  position: relative;
+  flex-shrink: 0;
+  width: 340px;
+  margin: 12px 14px 4px 0;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+/* Sits above Leaflet's own panes (z-index 400) and its controls (1000).
+   Top-right: the zoom buttons hold the top-left and the attribution, which
+   we must not cover, holds the bottom-right. */
+.map-mode-toggle {
+  position: absolute;
+  right: 10px;
+  top: 10px;
+  z-index: 1001;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  padding: 0 16px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--panel);
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.18);
+}
+
+/* ---------- Find: expanded (the old side-by-side) ---------- */
 .main-container {
   display: flex;
   flex: 1;
@@ -54,6 +121,7 @@ body {
 
 .sidebar {
   width: 420px;
+  flex-shrink: 0;
   background: var(--panel);
   border-right: 1px solid var(--border);
   display: flex;
@@ -61,10 +129,27 @@ body {
   overflow-y: auto;
 }
 
+.divider {
+  width: 6px;
+  flex-shrink: 0;
+  cursor: col-resize;
+  background: var(--border);
+}
+
+.divider:hover {
+  background: var(--accent);
+}
+
 .map-container {
   flex: 1;
   position: relative;
   background: var(--bg);
+}
+
+/* No dark basemap without an API key, so darken the plain OSM tiles instead.
+   Applied to the tile pane only — markers and popups must not invert. */
+[data-plain-tiles][data-theme='dark'] .leaflet-tile-pane {
+  filter: invert(1) hue-rotate(180deg) brightness(0.92) contrast(0.9);
 }
 
 /* ---------- Header ---------- */
@@ -96,7 +181,8 @@ body {
   border: none;
   background: transparent;
   color: var(--muted);
-  padding: 7px 18px;
+  min-height: 40px;
+  padding: 0 20px;
   border-radius: 8px;
   font-size: 14px;
   font-weight: 600;
@@ -114,31 +200,47 @@ body {
   gap: 10px;
 }
 
-.theme-toggle {
-  display: flex;
+.header-action {
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 34px;
-  height: 34px;
+  gap: 7px;
+  min-height: 44px;
+  padding: 0 14px;
   border-radius: 10px;
   border: 1px solid var(--border);
   background: var(--card);
   color: var(--text);
+  font-size: 13px;
+  font-weight: 600;
   cursor: pointer;
 }
 
-/* ---------- Category chips ---------- */
-.chip-row {
-  display: flex;
-  gap: 8px;
-  padding: 12px 14px 6px;
-  overflow-x: auto;
-  flex-shrink: 0;
-  scrollbar-width: none;
+.header-action-icon {
+  width: 44px;
+  padding: 0;
 }
 
-.chip-row::-webkit-scrollbar {
+.header-action:hover {
+  background: var(--card-hover);
+}
+
+/* ---------- Phone navigation ----------
+   Hidden on desktop, where the header tabs do the job. */
+.bottom-nav {
   display: none;
+}
+
+/* ---------- Category chips ---------- */
+/* Wrap, never scroll. As a single scrolling row this hid five of the nine
+   categories — Hygiene, Crisis, Youth, Veterans and Support — at every
+   viewport width, with no indicator that they existed. */
+.chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 10px 14px 6px;
+  flex-shrink: 0;
 }
 
 .chip {
@@ -985,19 +1087,115 @@ body {
 }
 
 /* ---------- Responsive ---------- */
+/* Not enough width to put the map beside the controls: stack it, let it
+   scroll away, and give the results the full column. */
+@media (max-width: 900px) {
+  .find-head {
+    position: static;
+    display: block;
+  }
+
+  .minimap {
+    width: auto;
+    height: 200px;
+    margin: 12px 14px 4px;
+  }
+}
+
 @media (max-width: 768px) {
+  /* Same information architecture as the desktop, reproportioned. The header
+     tabs give way to a bottom bar: they were 30px tall and were the only
+     navigation in the app. */
+  .header {
+    padding: 10px 14px;
+  }
+
+  .header h1 {
+    font-size: 17px;
+  }
+
+  .header-tabs {
+    display: none;
+  }
+
+  .header-action-label {
+    display: none;
+  }
+
+  .header-action {
+    width: 44px;
+    padding: 0;
+  }
+
+  .find-column {
+    border-left: none;
+    border-right: none;
+    padding-bottom: 76px; /* clear the bottom bar */
+  }
+
+  .minimap {
+    height: 170px;
+  }
+
+  /* Nine chips wrap to three rows at 375px, which costs a row of the fold.
+     Tightening the padding gets them into two without hiding any. */
+  .chip {
+    padding: 8px 11px;
+    gap: 5px;
+  }
+
+  .bottom-nav {
+    display: flex;
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1200;
+    background: var(--panel);
+    border-top: 1px solid var(--border);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .bottom-nav button {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    min-height: 60px;
+    border: none;
+    background: transparent;
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .bottom-nav button.active {
+    color: var(--accent);
+  }
+
+  /* Expanded map on a phone: stack rather than sit side by side. */
   .main-container {
-    flex-direction: column-reverse;
+    flex-direction: column;
+    padding-bottom: 60px;
   }
 
   .sidebar {
-    width: 100%;
-    max-height: 55vh;
+    width: 100% !important;
+    max-height: 45vh;
     border-right: none;
     border-top: 1px solid var(--border);
+    order: 2;
+  }
+
+  .divider {
+    display: none;
   }
 
   .map-container {
     height: 45vh;
+    order: 1;
   }
 }

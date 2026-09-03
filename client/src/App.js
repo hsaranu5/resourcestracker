@@ -2,7 +2,8 @@ import React, { useState, useEffect, useMemo, useRef } from 'react';
 import axios from 'axios';
 import './App.css';
 import Header from './components/Header';
-import MapView from './components/MapView';
+import BottomNav from './components/BottomNav';
+import MapView, { tilesNeedDarkFilter } from './components/MapView';
 import ResourceList from './components/ResourceList';
 import ResourceDetail from './components/ResourceDetail';
 import EventsList from './components/EventsList';
@@ -26,6 +27,10 @@ function App() {
     return 'light';
   });
   const [activeTab, setActiveTab] = useState('map');
+  // 'mini'  — results lead, the map rides above them for orientation
+  // 'split' — the old side-by-side, now an explicit choice rather than the default
+  const [mapMode, setMapMode] = useState('mini');
+  const [sidebarWidth, setSidebarWidth] = useState(420);
   const [communityView, setCommunityView] = useState('events');
   const [resources, setResources] = useState([]);
   const [category, setCategory] = useState('all');
@@ -37,6 +42,14 @@ function App() {
   const [offlineSince, setOfflineSince] = useState(null); // savedAt of the standby copy in use
   const postsRef = useRef(null);
   const eventsRef = useRef(null);
+
+  // Without a tile key we're on plain OSM, which has no dark style — CSS
+  // darkens the tile pane instead. Flagged on the root element rather than the
+  // map: react-leaflet only reads MapContainer's className at mount, so a
+  // class there would never come or go with the theme.
+  useEffect(() => {
+    if (tilesNeedDarkFilter) document.documentElement.dataset.plainTiles = '1';
+  }, []);
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
@@ -115,6 +128,115 @@ function App() {
       });
   }, [withDistance, category, radius, query]);
 
+  // Shared computers: wipe everything this browser is holding — the standby
+  // copy, the theme, the saved org email — and reload clean for the next
+  // person. Most library terminals reset themselves, but not all of them do.
+  const startOver = () => {
+    try { localStorage.clear(); } catch (e) { /* storage unavailable */ }
+    window.location.reload();
+  };
+
+  // Split mode only: drag the divider to trade list width for map width.
+  // A drag needs a working mouse, so the expand/collapse buttons stay the
+  // primary control and this is an extra.
+  const startDividerDrag = (event) => {
+    event.preventDefault();
+    const move = (e) => {
+      const x = e.touches ? e.touches[0].clientX : e.clientX;
+      setSidebarWidth(Math.min(Math.max(x, 320), window.innerWidth - 280));
+    };
+    const stop = () => {
+      window.removeEventListener('mousemove', move);
+      window.removeEventListener('mouseup', stop);
+      window.removeEventListener('touchmove', move);
+      window.removeEventListener('touchend', stop);
+    };
+    window.addEventListener('mousemove', move);
+    window.addEventListener('mouseup', stop);
+    window.addEventListener('touchmove', move);
+    window.addEventListener('touchend', stop);
+  };
+
+  // Search leads: it is the highest-intent control, and it used to sit third,
+  // below two rows of filters. The chips wrap rather than scroll — five of the
+  // nine categories, Crisis among them, used to be off-screen at every width.
+  const findControls = (
+    <div className="find-controls">
+      <div className="search-row">
+        <Icon name="search" size={14} className="search-glyph" />
+        <input
+          className="search-input"
+          type="search"
+          placeholder="Search name, service, or ZIP"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+        />
+      </div>
+
+      <div className="chip-row">
+        <button
+          className={`chip ${category === 'all' ? 'chip-active' : ''}`}
+          onClick={() => setCategory('all')}
+        >
+          <Icon name="grid" size={13} /> All
+        </button>
+        {CATEGORIES.map((c) => (
+          <button
+            key={c.key}
+            className={`chip ${category === c.key ? 'chip-active' : ''}`}
+            style={category === c.key ? { background: c.color, borderColor: c.color, color: '#fff' } : undefined}
+            onClick={() => setCategory(category === c.key ? 'all' : c.key)}
+          >
+            <Icon name={c.key} size={13} /> {c.label}
+          </button>
+        ))}
+      </div>
+
+      <div className="radius-row">
+        <span className="radius-label">Within</span>
+        <div className="radius-pills">
+          {RADII.map((mi) => (
+            <button
+              key={mi}
+              className={`radius-pill ${radius === mi ? 'radius-active' : ''}`}
+              onClick={() => setRadius(mi)}
+            >
+              {mi} mi
+            </button>
+          ))}
+        </div>
+        <span className="found-count">{filtered.length} found</span>
+      </div>
+    </div>
+  );
+
+  const resourceList = (
+    <ResourceList
+      resources={filtered}
+      onSelectResource={setSelectedResource}
+      selectedResource={selectedResource}
+      onShowDetail={setDetailResource}
+    />
+  );
+
+  const map = (
+    <MapView
+      resources={filtered}
+      userLocation={userLocation}
+      radiusMiles={radius}
+      selectedResource={selectedResource}
+      onResourceSelect={setSelectedResource}
+      theme={theme}
+    />
+  );
+
+  const offlineBanner = offlineSince ? (
+    <div className="offline-banner">
+      <Icon name="alert" size={13} /> Offline — showing saved data within {OFFLINE_RADIUS_MI} mi
+      (saved {relativeTime(offlineSince)})
+    </div>
+  ) : null;
+
   return (
     <div className="App">
       <Header
@@ -122,119 +244,90 @@ function App() {
         onTabChange={setActiveTab}
         theme={theme}
         onToggleTheme={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+        onStartOver={startOver}
       />
 
-      <div className="main-container">
-        <div className="sidebar">
-          {offlineSince && (
-            <div className="offline-banner">
-              <Icon name="alert" size={13} /> Offline — showing saved data within {OFFLINE_RADIUS_MI} mi
-              (saved {relativeTime(offlineSince)})
+      {activeTab === 'map' && mapMode === 'mini' && (
+        <main className="find-column">
+          {offlineBanner}
+          {/* Controls and map share one sticky head. Stacking the map above
+              the controls pushed the first result to 559px on a 768px-tall
+              terminal — one card visible. Side by side it costs ~210px total
+              and stays on screen while you scroll, which is what an
+              orientation map is for. Below 900px this stacks and scrolls. */}
+          <div className="find-head">
+            {findControls}
+            <div className="minimap">
+              {map}
+              <button className="map-mode-toggle" onClick={() => setMapMode('split')}>
+                <Icon name="expand" size={14} /> Expand map
+              </button>
             </div>
-          )}
-          {activeTab === 'map' && (
-            <>
-              <div className="chip-row">
-                <button
-                  className={`chip ${category === 'all' ? 'chip-active' : ''}`}
-                  onClick={() => setCategory('all')}
-                >
-                  <Icon name="grid" size={13} /> All
-                </button>
-                {CATEGORIES.map((c) => (
-                  <button
-                    key={c.key}
-                    className={`chip ${category === c.key ? 'chip-active' : ''}`}
-                    style={category === c.key ? { background: c.color, borderColor: c.color, color: '#fff' } : undefined}
-                    onClick={() => setCategory(category === c.key ? 'all' : c.key)}
-                  >
-                    <Icon name={c.key} size={13} /> {c.label}
-                  </button>
-                ))}
-              </div>
+          </div>
+          {resourceList}
+        </main>
+      )}
 
-              <div className="radius-row">
-                <span className="radius-label">Within</span>
-                <div className="radius-pills">
-                  {RADII.map((mi) => (
-                    <button
-                      key={mi}
-                      className={`radius-pill ${radius === mi ? 'radius-active' : ''}`}
-                      onClick={() => setRadius(mi)}
-                    >
-                      {mi} mi
-                    </button>
-                  ))}
-                </div>
-                <span className="found-count">{filtered.length} found</span>
-              </div>
-
-              <div className="search-row">
-                <Icon name="search" size={14} className="search-glyph" />
-                <input
-                  className="search-input"
-                  type="search"
-                  placeholder="Search name, service, or ZIP"
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                />
-              </div>
-
-              <ResourceList
-                resources={filtered}
-                onSelectResource={setSelectedResource}
-                selectedResource={selectedResource}
-                onShowDetail={setDetailResource}
-              />
-            </>
-          )}
-
-          {activeTab === 'community' && (
-            <>
-              <div className="segmented">
-                <button
-                  className={communityView === 'events' ? 'active' : ''}
-                  onClick={() => setCommunityView('events')}
-                >
-                  Events
-                </button>
-                <button
-                  className={communityView === 'posts' ? 'active' : ''}
-                  onClick={() => setCommunityView('posts')}
-                >
-                  Posts
-                </button>
-              </div>
-              <p className="community-note">
-                <Icon name="calendar" size={13} /> Schedules published in the Street Sheet.
-                Call ahead — times can change.
-              </p>
-
-              {communityView === 'events' ? (
-                <EventsList ref={eventsRef} userLocation={userLocation} />
-              ) : (
-                <CommunityPosts ref={postsRef} />
-              )}
-
-              <AddPostForm
-                onPostAdded={() => { setCommunityView('posts'); postsRef.current?.refresh(); }}
-                onEventAdded={() => { setCommunityView('events'); eventsRef.current?.refresh(); }}
-              />
-            </>
-          )}
-        </div>
-
-        <div className="map-container">
-          <MapView
-            resources={filtered}
-            userLocation={userLocation}
-            radiusMiles={radius}
-            selectedResource={selectedResource}
-            onResourceSelect={setSelectedResource}
-            theme={theme}
+      {activeTab === 'map' && mapMode === 'split' && (
+        <div className="main-container">
+          <div className="sidebar" style={{ width: sidebarWidth }}>
+            {offlineBanner}
+            {findControls}
+            {resourceList}
+          </div>
+          <div
+            className="divider"
+            role="separator"
+            aria-orientation="vertical"
+            aria-label="Resize the list and map"
+            onMouseDown={startDividerDrag}
+            onTouchStart={startDividerDrag}
           />
+          <div className="map-container">
+            {map}
+            <button className="map-mode-toggle" onClick={() => setMapMode('mini')}>
+              <Icon name="collapse" size={14} /> Back to list
+            </button>
+          </div>
         </div>
-      </div>
+      )}
+
+      {activeTab === 'community' && (
+        <main className="find-column">
+          {offlineBanner}
+          <div className="segmented">
+            <button
+              className={communityView === 'events' ? 'active' : ''}
+              onClick={() => setCommunityView('events')}
+            >
+              Events
+            </button>
+            <button
+              className={communityView === 'posts' ? 'active' : ''}
+              onClick={() => setCommunityView('posts')}
+            >
+              Posts
+            </button>
+          </div>
+          <p className="community-note">
+            <Icon name="calendar" size={13} /> Schedules published in the Street Sheet.
+            Call ahead — times can change.
+          </p>
+
+          {communityView === 'events' ? (
+            <EventsList ref={eventsRef} userLocation={userLocation} />
+          ) : (
+            <CommunityPosts ref={postsRef} />
+          )}
+
+          <AddPostForm
+            onPostAdded={() => { setCommunityView('posts'); postsRef.current?.refresh(); }}
+            onEventAdded={() => { setCommunityView('events'); eventsRef.current?.refresh(); }}
+          />
+        </main>
+      )}
+
+      <BottomNav activeTab={activeTab} onTabChange={setActiveTab} />
 
       {detailResource && (
         <ResourceDetail resource={detailResource} onClose={() => setDetailResource(null)} />

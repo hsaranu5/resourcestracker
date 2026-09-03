@@ -5,10 +5,27 @@ import 'leaflet/dist/leaflet.css';
 import Icon, { iconSvgString } from '../icons';
 import { categoryOf, googleMapsUrl } from '../lib';
 
-const TILES = {
-  dark: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
-  light: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png'
-};
+// Basemap tiles. CARTO's public endpoint now stamps "API KEY REQUIRED" across
+// every tile, so a key is required for the styled light/dark pair. Set
+// REACT_APP_MAP_TILES_KEY (Stadia) in .env and both themes get their proper
+// style; without one we fall back to plain OpenStreetMap, which needs no key
+// but has no dark variant — hence the CSS filter in App.css that darkens it.
+const TILE_KEY = process.env.REACT_APP_MAP_TILES_KEY;
+
+const OSM_URL = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
+const OSM_ATTRIB =
+  '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
+
+const TILES = TILE_KEY
+  ? {
+      dark: `https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png?api_key=${TILE_KEY}`,
+      light: `https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png?api_key=${TILE_KEY}`,
+      attribution: `${OSM_ATTRIB} &copy; <a href="https://stadiamaps.com/">Stadia Maps</a>`
+    }
+  : { dark: OSM_URL, light: OSM_URL, attribution: OSM_ATTRIB };
+
+/** True when we're on unstyled OSM and the dark theme needs a CSS assist. */
+export const tilesNeedDarkFilter = !TILE_KEY;
 
 // Category markers in the iOS style: colored circle, white ring, SVG glyph.
 // A cluster (more than one resource at the same spot) gets a count badge.
@@ -124,11 +141,7 @@ const MapView = ({ resources, userLocation, radiusMiles, selectedResource, onRes
 
   return (
     <MapContainer center={center} zoom={12} style={{ height: '100%', width: '100%' }}>
-      <TileLayer
-        key={theme}
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'
-        url={TILES[theme] || TILES.dark}
-      />
+      <TileLayer key={theme} attribution={TILES.attribution} url={TILES[theme] || TILES.light} />
 
       <FlyToSelection selectedResource={selectedResource} markerRefs={markerRefs} clusterFor={clusterFor} />
 
