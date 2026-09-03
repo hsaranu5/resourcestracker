@@ -30,6 +30,41 @@ export const googleMapsUrl = (r) => {
   return q ? `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(q)}` : null;
 };
 
+// ---------------------------------------------------------------------------
+// ZIP → approximate centre, derived from the catalogue itself.
+//
+// Someone on a library terminal usually has no location fix — the browser
+// denies it, or the fix is the library's, not theirs. Typing a ZIP is the
+// cheapest way to get honest distances. Rather than call a geocoding service
+// (a network round trip, on a page whose whole point is working without one),
+// we average the coordinates of the resources already in that ZIP. It covers
+// exactly the area we have resources for, which is exactly the area that can
+// be usefully sorted.
+// ---------------------------------------------------------------------------
+export const buildZipCentroids = (resources) => {
+  const sums = new Map();
+  for (const r of resources) {
+    const zip = (r.zip_code || '').trim().slice(0, 5);
+    if (!zip || r.latitude == null || r.longitude == null) continue;
+    const acc = sums.get(zip) || { lat: 0, lng: 0, n: 0 };
+    acc.lat += r.latitude;
+    acc.lng += r.longitude;
+    acc.n += 1;
+    sums.set(zip, acc);
+  }
+  const out = {};
+  for (const [zip, acc] of sums) {
+    out[zip] = { latitude: acc.lat / acc.n, longitude: acc.lng / acc.n };
+  }
+  return out;
+};
+
+// Hotlines worth surfacing before anyone touches a filter: the two national
+// three-digit numbers, then the local line for someone with nowhere to sleep.
+// Matched by name so the strip survives re-seeding; anything missing is simply
+// skipped and the next crisis entry fills the slot.
+export const PRIORITY_LINES = ['988', '211', 'Hotline for the Homeless'];
+
 export const POST_CATEGORIES = {
   update:  { label: 'Update',  icon: 'megaphone', color: '#4A80E8' },
   alert:   { label: 'Alert',   icon: 'alert',     color: '#E8842C' },

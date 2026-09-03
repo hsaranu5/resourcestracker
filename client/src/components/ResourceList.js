@@ -26,7 +26,18 @@ export const VerifiedWarning = ({ verified }) => {
   );
 };
 
-const ResourceList = ({ resources, onSelectResource, selectedResource, onShowDetail }) => {
+/** No street address: a phone or text line, useful from anywhere. */
+export const isPhoneOnly = (r) => r.latitude == null || r.longitude == null;
+
+const ResourceList = ({
+  resources,
+  onSelectResource,
+  selectedResource,
+  onShowDetail,
+  showDistance = true,
+  selectedForPrint,
+  onTogglePrint
+}) => {
   const itemRefs = useRef({});
 
   // Tapping a pin on the map brings its card into view here — the mirror of
@@ -46,76 +57,109 @@ const ResourceList = ({ resources, onSelectResource, selectedResource, onShowDet
     );
   }
 
+  // Phone and text lines have no distance, so a distance-sorted list dumps
+  // them at the bottom looking like the least relevant results. They are not —
+  // they work from anywhere. Give them their own labelled block instead.
+  const placed = resources.filter((r) => !isPhoneOnly(r));
+  const phoneOnly = resources.filter(isPhoneOnly);
+
+  const card = (resource) => {
+    const cat = categoryOf(resource.type);
+    const maps = googleMapsUrl(resource);
+    const tel = resource.phone ? resource.phone.replace(/[^\d+]/g, '') : null;
+    return (
+      <div
+        key={resource.id}
+        ref={(el) => { itemRefs.current[resource.id] = el; }}
+        className={`resource-item ${selectedResource?.id === resource.id ? 'selected' : ''}`}
+        onClick={() => onSelectResource(resource)}
+      >
+        <div className="resource-top">
+          {onTogglePrint && (
+            <input
+              type="checkbox"
+              className="print-check"
+              checked={!!selectedForPrint?.has(resource.id)}
+              onClick={(e) => e.stopPropagation()}
+              onChange={() => onTogglePrint(resource.id)}
+              aria-label={`Add ${resource.name} to the printed list`}
+            />
+          )}
+          <span className="resource-icon" style={{ background: cat.color }}>
+            <Icon name={cat.key} size={17} />
+          </span>
+          <div className="resource-titles">
+            <h3>{resource.name}</h3>
+            {resource.organization && <div className="organization">{resource.organization}</div>}
+          </div>
+          {showDistance && resource.distanceMiles != null && (
+            <span className="distance">
+              {resource.distanceMiles < 0.1 ? '< 0.1' : resource.distanceMiles.toFixed(1)} mi
+            </span>
+          )}
+        </div>
+
+        <div className="badge-row">
+          <OpenBadge hours={resource.hours} />
+          <VerifiedWarning verified={resource.verified} />
+          {isPhoneOnly(resource) && <span className="badge badge-phone">Phone only</span>}
+        </div>
+
+        {resource.address && (
+          <div className="address">
+            <Icon name="pin" size={12} /> {resource.address}
+            {resource.city ? `, ${resource.city}` : ''}
+            {resource.state ? `, ${resource.state}` : ''}
+            {resource.zip_code ? `, ${resource.zip_code}` : ''}
+          </div>
+        )}
+        {resource.hours && (
+          <div className="hours"><Icon name="clock" size={12} /> {resource.hours}</div>
+        )}
+
+        {/* Three peers, not one filled button and two afterthoughts. Whether a
+            place is open and who it serves matters more than routing to it,
+            and a full-width Directions on every card ranked nothing. */}
+        <div className="card-actions">
+          {tel && (
+            <a className="action" href={`tel:${tel}`} onClick={(e) => e.stopPropagation()}>
+              <Icon name="phone" size={13} /> {resource.phone}
+            </a>
+          )}
+          {maps && (
+            <a
+              className="action"
+              href={maps}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <Icon name="directions" size={13} /> Directions
+            </a>
+          )}
+          <button
+            className="action"
+            onClick={(e) => { e.stopPropagation(); onShowDetail(resource); }}
+          >
+            <Icon name="info" size={13} /> Details
+          </button>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="resource-list">
-      {resources.map((resource) => {
-        const cat = categoryOf(resource.type);
-        const maps = googleMapsUrl(resource);
-        return (
-          <div
-            key={resource.id}
-            ref={(el) => { itemRefs.current[resource.id] = el; }}
-            className={`resource-item ${selectedResource?.id === resource.id ? 'selected' : ''}`}
-            onClick={() => onSelectResource(resource)}
-          >
-            <div className="resource-top">
-              <span className="resource-icon" style={{ background: cat.color }}>
-                <Icon name={cat.key} size={17} />
-              </span>
-              <div className="resource-titles">
-                <h3>{resource.name}</h3>
-                {resource.organization && <div className="organization">{resource.organization}</div>}
-              </div>
-              {resource.distanceMiles != null && (
-                <span className="distance">
-                  {resource.distanceMiles < 0.1 ? '< 0.1' : resource.distanceMiles.toFixed(1)} mi
-                </span>
-              )}
-            </div>
+      {placed.map(card)}
 
-            <div className="badge-row">
-              <OpenBadge hours={resource.hours} />
-              <VerifiedWarning verified={resource.verified} />
-            </div>
-
-            {resource.address && (
-              <div className="address">
-                <Icon name="pin" size={12} /> {resource.address}
-                {resource.city ? `, ${resource.city}` : ''}
-                {resource.state ? `, ${resource.state}` : ''}
-                {resource.zip_code ? `, ${resource.zip_code}` : ''}
-              </div>
-            )}
-            {resource.phone && (
-              <div className="address"><Icon name="phone" size={12} /> {resource.phone}</div>
-            )}
-            {resource.hours && (
-              <div className="hours"><Icon name="clock" size={12} /> {resource.hours}</div>
-            )}
-
-            <div className="card-actions">
-              {maps && (
-                <a
-                  className="action-primary"
-                  href={maps}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <Icon name="directions" size={14} /> Directions
-                </a>
-              )}
-              <button
-                className="action-secondary"
-                onClick={(e) => { e.stopPropagation(); onShowDetail(resource); }}
-                aria-label={`Details for ${resource.name}`}
-              >
-                <Icon name="info" size={15} />
-              </button>
-            </div>
-          </div>
-        );
-      })}
+      {phoneOnly.length > 0 && (
+        <>
+          <h2 className="list-group-head">
+            Call or text — no walk-in location ({phoneOnly.length})
+          </h2>
+          {phoneOnly.map(card)}
+        </>
+      )}
     </div>
   );
 };

@@ -72,23 +72,44 @@ const buildClusters = (resources) => {
   }));
 };
 
+// MapContainer reads `center` once, at mount. The geolocation fix (or a ZIP
+// the visitor types) lands afterwards, so without this the list would re-sort
+// around the visitor while the map stayed on downtown Kansas City. Recentre
+// on a real origin change only — not on every pan the user makes.
+const RecentreOnOrigin = ({ userLocation }) => {
+  const map = useMap();
+  const { latitude, longitude } = userLocation;
+  useEffect(() => {
+    map.setView([latitude, longitude], map.getZoom(), { animate: true });
+  }, [map, latitude, longitude]);
+  return null;
+};
+
 // Picking a resource in the list flies the map to its pin AND opens the
 // popup, so its contents show on the map side too. The marker may be a cluster,
 // so we look it up by whichever cluster contains the selected resource.
-const FlyToSelection = ({ selectedResource, markerRefs, clusterFor }) => {
+const FlyToSelection = ({ selectedResource, markerRefs, clusterFor, compact }) => {
   const map = useMap();
   useEffect(() => {
     if (selectedResource?.latitude != null && selectedResource?.longitude != null) {
-      map.flyTo([selectedResource.latitude, selectedResource.longitude], Math.max(map.getZoom(), 14), {
-        duration: 0.6
-      });
+      const target = [selectedResource.latitude, selectedResource.longitude];
+      if (compact) {
+        // Pan, don't zoom. Zooming to 14 on a 340px map leaves one pin and no
+        // surroundings — which is the whole reason the minimap is there. And
+        // no popup: it would cover the map entirely. The card the visitor just
+        // clicked already holds the detail.
+        map.panTo(target, { duration: 0.6 });
+        return undefined;
+      }
+      map.flyTo(target, Math.max(map.getZoom(), 14), { duration: 0.6 });
       const clusterId = clusterFor(selectedResource);
       // Open once the flight lands (timeout fallback covers the "already
       // there" case where moveend never fires).
       const timer = setTimeout(() => markerRefs.current[clusterId]?.openPopup(), 650);
       return () => clearTimeout(timer);
     }
-  }, [selectedResource, map, markerRefs, clusterFor]);
+    return undefined;
+  }, [selectedResource, map, markerRefs, clusterFor, compact]);
   return null;
 };
 
@@ -123,7 +144,10 @@ const PopupResource = ({ resource }) => {
   );
 };
 
-const MapView = ({ resources, userLocation, radiusMiles, selectedResource, onResourceSelect, theme }) => {
+const MapView = ({
+  resources, userLocation, radiusMiles, selectedResource, onResourceSelect, theme,
+  compact = false
+}) => {
   const center = [userLocation.latitude, userLocation.longitude];
   const markerRefs = useRef({});
 
@@ -143,7 +167,14 @@ const MapView = ({ resources, userLocation, radiusMiles, selectedResource, onRes
     <MapContainer center={center} zoom={12} style={{ height: '100%', width: '100%' }}>
       <TileLayer key={theme} attribution={TILES.attribution} url={TILES[theme] || TILES.light} />
 
-      <FlyToSelection selectedResource={selectedResource} markerRefs={markerRefs} clusterFor={clusterFor} />
+      <RecentreOnOrigin userLocation={userLocation} />
+
+      <FlyToSelection
+        selectedResource={selectedResource}
+        markerRefs={markerRefs}
+        clusterFor={clusterFor}
+        compact={compact}
+      />
 
       <Circle
         center={center}
@@ -161,18 +192,22 @@ const MapView = ({ resources, userLocation, radiusMiles, selectedResource, onRes
             icon={getIcon(lead.type, cluster.members.length)}
             eventHandlers={{ click: () => onResourceSelect(lead) }}
           >
-            <Popup>
-              {cluster.members.length > 1 && (
-                <div className="popup-cluster-head">
-                  {cluster.members.length} services at this location
+            {/* No popups on the minimap — a marker tap selects the resource,
+                which scrolls its card into view in the list beside it. */}
+            {!compact && (
+              <Popup>
+                {cluster.members.length > 1 && (
+                  <div className="popup-cluster-head">
+                    {cluster.members.length} services at this location
+                  </div>
+                )}
+                <div className={cluster.members.length > 1 ? 'popup-cluster-list' : ''}>
+                  {cluster.members.map((member) => (
+                    <PopupResource key={member.id} resource={member} />
+                  ))}
                 </div>
-              )}
-              <div className={cluster.members.length > 1 ? 'popup-cluster-list' : ''}>
-                {cluster.members.map((member) => (
-                  <PopupResource key={member.id} resource={member} />
-                ))}
-              </div>
-            </Popup>
+              </Popup>
+            )}
           </Marker>
         );
       })}

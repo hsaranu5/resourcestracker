@@ -74,9 +74,16 @@ body {
   padding-bottom: 6px;
 }
 
-.find-controls {
+/* Only inside the horizontal head. In split mode these same controls sit in a
+   vertical flex column, where flex:1 made them grow and open a dead gap
+   between the filters and the first result. */
+.find-head > .find-controls {
   flex: 1;
   min-width: 0;
+}
+
+.find-controls {
+  flex-shrink: 0;
 }
 
 .minimap {
@@ -271,6 +278,7 @@ body {
 /* ---------- Radius row ---------- */
 .radius-row {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 10px;
   padding: 8px 14px;
@@ -496,8 +504,227 @@ body {
 
 .card-actions {
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
   margin-top: 10px;
+}
+
+/* ---------- Crisis lines ----------
+   Outside the tabs and outside every filter. All 19 crisis records are
+   hotlines with no address: they can never be on the map, and in a
+   distance-sorted list they land at the bottom. */
+.crisis-strip {
+  background: rgba(214, 69, 69, 0.09);
+  border-bottom: 1px solid var(--border);
+  padding: 8px 24px;
+}
+
+.crisis-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 16px;
+}
+
+.crisis-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: #c0392b;
+}
+
+[data-theme='dark'] .crisis-label {
+  color: #ef8a80;
+}
+
+.crisis-line {
+  font-size: 13px;
+  color: var(--text);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.crisis-line strong {
+  color: #c0392b;
+  margin-right: 5px;
+}
+
+[data-theme='dark'] .crisis-line strong {
+  color: #ef8a80;
+}
+
+.crisis-line:hover {
+  text-decoration: underline;
+}
+
+.crisis-more {
+  margin-left: auto;
+  border: 1px solid var(--border);
+  background: var(--panel);
+  color: var(--text);
+  border-radius: 999px;
+  min-height: 32px;
+  padding: 0 12px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.crisis-all {
+  list-style: none;
+  margin: 10px 0 2px;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 6px 20px;
+  font-size: 13px;
+}
+
+.crisis-all a {
+  text-decoration: none;
+}
+
+.crisis-all strong {
+  color: #c0392b;
+}
+
+[data-theme='dark'] .crisis-all strong {
+  color: #ef8a80;
+}
+
+.crisis-hours {
+  color: var(--muted);
+}
+
+/* ---------- Where distances come from ---------- */
+/* Lives inside .radius-row: settled it is one short label beside the count,
+   unanswered it wraps to a full line of its own. */
+.location-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.location-bar-settled {
+  color: var(--muted);
+  gap: 5px;
+}
+
+.location-ask {
+  font-weight: 600;
+}
+
+.location-primary {
+  min-height: 36px;
+  padding: 0 14px;
+  border: none;
+  border-radius: 999px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.location-primary:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.location-secondary {
+  min-height: 36px;
+  padding: 0 14px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--card);
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.location-link {
+  border: none;
+  background: none;
+  color: var(--accent);
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
+  padding: 6px 4px;
+  cursor: pointer;
+}
+
+.location-zip {
+  width: 92px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--card);
+  color: var(--text);
+  font-size: 15px;
+  padding: 8px 10px;
+}
+
+.location-error {
+  color: #d64545;
+  flex-basis: 100%;
+}
+
+/* ---------- List grouping & print selection ---------- */
+.list-group-head {
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 20px 2px 10px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+}
+
+.badge-phone {
+  background: rgba(74, 128, 232, 0.16);
+  color: var(--accent);
+}
+
+.print-check {
+  width: 18px;
+  height: 18px;
+  margin: 2px 2px 0 0;
+  flex-shrink: 0;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+/* Three peers. A filled full-width Directions on all 114 cards made the list
+   read as 114 primary actions and ranked nothing; the question people ask
+   first is whether a place is open and who it serves. */
+.action {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text);
+  border-radius: 999px;
+  padding: 8px 13px;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.action:hover {
+  background: var(--card-hover);
+  border-color: var(--accent);
 }
 
 .action-primary {
@@ -1135,6 +1362,29 @@ body {
 
   .minimap {
     height: 170px;
+  }
+
+  .crisis-strip {
+    padding: 7px 14px;
+  }
+
+  .crisis-name {
+    display: none;
+  }
+
+  .crisis-label {
+    font-size: 11px;
+  }
+
+  .crisis-row {
+    gap: 6px 12px;
+  }
+
+  /* margin-left:auto pushed this onto a row of its own on a phone. */
+  .crisis-more {
+    margin-left: 0;
+    min-height: 28px;
+    padding: 0 9px;
   }
 
   /* Nine chips wrap to three rows at 375px, which costs a row of the fold.

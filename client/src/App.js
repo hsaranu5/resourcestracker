@@ -9,10 +9,12 @@ import ResourceDetail from './components/ResourceDetail';
 import EventsList from './components/EventsList';
 import CommunityPosts from './components/CommunityPosts';
 import AddPostForm from './components/AddPostForm';
+import CrisisStrip from './components/CrisisStrip';
+import LocationBar from './components/LocationBar';
 import Icon from './icons';
 import {
   CATEGORIES, KC_CENTER, OFFLINE_RADIUS_MI,
-  haversineMiles, saveOffline, loadOffline, relativeTime
+  haversineMiles, saveOffline, loadOffline, relativeTime, buildZipCentroids
 } from './lib';
 
 const API_URL = process.env.REACT_APP_API_URL || '/api';
@@ -37,6 +39,13 @@ function App() {
   const [radius, setRadius] = useState(10);
   const [query, setQuery] = useState('');
   const [userLocation, setUserLocation] = useState(KC_CENTER);
+  // Where distances are measured from. 'unknown' until the visitor answers —
+  // and while it is unknown we show no distances at all rather than quietly
+  // measuring from downtown Kansas City and labelling it as theirs.
+  const [origin, setOrigin] = useState({ kind: 'unknown' });
+  const [locating, setLocating] = useState(false);
+  const [locationError, setLocationError] = useState('');
+  const [selectedForPrint, setSelectedForPrint] = useState(() => new Set());
   const [selectedResource, setSelectedResource] = useState(null);
   const [detailResource, setDetailResource] = useState(null);
   const [offlineSince, setOfflineSince] = useState(null); // savedAt of the standby copy in use
@@ -75,15 +84,6 @@ function App() {
           setOfflineSince(cached.savedAt);
         }
       });
-
-    // Center on the visitor if they allow it; Kansas City otherwise.
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (pos) => setUserLocation({ latitude: pos.coords.latitude, longitude: pos.coords.longitude }),
-        () => {},
-        { timeout: 5000 }
-      );
-    }
   }, []);
 
   // Keep the offline standby copy fresh: every time we have live data and a
@@ -93,6 +93,42 @@ function App() {
       saveOffline('resources', resources, userLocation);
     }
   }, [resources, userLocation, offlineSince]);
+
+  const zipCentroids = useMemo(() => buildZipCentroids(resources), [resources]);
+
+  const useDeviceLocation = () => {
+    if (!navigator.geolocation) {
+      setLocationError('This browser cannot share a location. Try a ZIP instead.');
+      return;
+    }
+    setLocating(true);
+    setLocationError('');
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setUserLocation({ latitude: pos.coords.latitude, longitude: pos.coords.longitude });
+        setOrigin({ kind: 'device' });
+        setLocating(false);
+      },
+      () => {
+        setLocating(false);
+        setLocationError('Location unavailable. Enter a ZIP, or skip.');
+      },
+      { timeout: 8000 }
+    );
+  };
+
+  const useZip = (zip) => {
+    const centre = zipCentroids[zip];
+    if (!centre) {
+      setLocationError(`No resources listed in ${zip} yet. Try a nearby ZIP, or skip.`);
+      return;
+    }
+    setUserLocation(centre);
+    setOrigin({ kind: 'zip', zip });
+    setLocationError('');
+  };
+
+  const showDistance = origin.kind === 'device' || origin.kind === 'zip';
 
   const withDistance = useMemo(
     () =>
@@ -113,7 +149,9 @@ function App() {
     return withDistance
       .filter((r) => {
         if (category !== 'all' && r.type !== category) return false;
-        if (r.distanceMiles != null && r.distanceMiles > radius) return false;
+        // No origin means no honest radius: show everything rather than trim
+        // the list against a point the visitor never chose.
+        if (showDistance && r.distanceMiles != null && r.distanceMiles > radius) return false;
         if (q) {
           const haystack = [r.name, r.organization, r.services, r.description, r.zip_code, r.address]
             .filter(Boolean).join(' ').toLowerCase();
@@ -122,11 +160,12 @@ function App() {
         return true;
       })
       .sort((a, b) => {
+        if (!showDistance) return a.name.localeCompare(b.name);
         if (a.distanceMiles == null) return 1;
         if (b.distanceMiles == null) return -1;
         return a.distanceMiles - b.distanceMiles;
       });
-  }, [withDistance, category, radius, query]);
+  }, [withDistance, category, radius, query, showDistance]);
 
   // Shared computers: wipe everything this browser is holding — the standby
   // copy, the theme, the saved org email — and reload clean for the next
@@ -192,23 +231,53 @@ function App() {
         ))}
       </div>
 
+      {/* A radius is meaningless without an origin, so it only appears once
+          there is one. */}
       <div className="radius-row">
-        <span className="radius-label">Within</span>
-        <div className="radius-pills">
-          {RADII.map((mi) => (
-            <button
-              key={mi}
-              className={`radius-pill ${radius === mi ? 'radius-active' : ''}`}
-              onClick={() => setRadius(mi)}
-            >
-              {mi} mi
-            </button>
-          ))}
-        </div>
-        <span className="found-count">{filtered.length} found</span>
+        {showDistance && (
+          <>
+            <span className="radius-label">Within</span>
+            <div className="radius-pills">
+              {RADII.map((mi) => (
+                <button
+                  key={mi}
+                  className={`radius-pill ${radius === mi ? 'radius-active' : ''}`}
+                  onClick={() => setRadius(mi)}
+                >
+                  {mi} mi
+                </button>
+              ))}
+            </div>
+          </>
+        )}
+        {/* Settled, this is a short label and rides on the same line as the
+            count. Unanswered, it is a question with three buttons and wraps
+            onto its own. */}
+        <LocationBar
+          origin={origin}
+          busy={locating}
+          error={locationError}
+          onUseDevice={useDeviceLocation}
+          onUseZip={useZip}
+          onSkip={() => { setOrigin({ kind: 'skipped' }); setLocationError(''); }}
+          onReset={() => { setOrigin({ kind: 'unknown' }); setLocationError(''); }}
+        />
+
+        <span className="found-count">
+          {filtered.length} found
+          {selectedForPrint.size > 0 && ` · ${selectedForPrint.size} ticked`}
+        </span>
       </div>
     </div>
   );
+
+  const togglePrint = (id) => {
+    setSelectedForPrint((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
 
   const resourceList = (
     <ResourceList
@@ -216,10 +285,13 @@ function App() {
       onSelectResource={setSelectedResource}
       selectedResource={selectedResource}
       onShowDetail={setDetailResource}
+      showDistance={showDistance}
+      selectedForPrint={selectedForPrint}
+      onTogglePrint={togglePrint}
     />
   );
 
-  const map = (
+  const renderMap = (compact) => (
     <MapView
       resources={filtered}
       userLocation={userLocation}
@@ -227,6 +299,7 @@ function App() {
       selectedResource={selectedResource}
       onResourceSelect={setSelectedResource}
       theme={theme}
+      compact={compact}
     />
   );
 
@@ -247,6 +320,10 @@ function App() {
         onStartOver={startOver}
       />
 
+      {/* Above the tabs and outside every filter: whichever section you are
+          in, these numbers are on screen. */}
+      <CrisisStrip resources={resources} />
+
       {activeTab === 'map' && mapMode === 'mini' && (
         <main className="find-column">
           {offlineBanner}
@@ -258,7 +335,7 @@ function App() {
           <div className="find-head">
             {findControls}
             <div className="minimap">
-              {map}
+              {renderMap(true)}
               <button className="map-mode-toggle" onClick={() => setMapMode('split')}>
                 <Icon name="expand" size={14} /> Expand map
               </button>
@@ -284,7 +361,7 @@ function App() {
             onTouchStart={startDividerDrag}
           />
           <div className="map-container">
-            {map}
+            {renderMap(false)}
             <button className="map-mode-toggle" onClick={() => setMapMode('mini')}>
               <Icon name="collapse" size={14} /> Back to list
             </button>
