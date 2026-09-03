@@ -15,3 +15,14 @@ root.render(
 // to log results (for example: reportWebVitals(console.log))
 // or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
 reportWebVitals();
+
+// App shell cache, so the standby copy in lib.js is reachable on a cold start
+// with no connection — see public/sw.js. Production only: in development a
+// service worker serves stale bundles and fights hot reload.
+if (process.env.NODE_ENV === 'production' && 'serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch(() => {
+      // No offline boot: the app still works whenever there is a connection.
+    });
+  });
+}

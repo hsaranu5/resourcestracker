@@ -24,11 +24,10 @@ router.patch('/community/events/:slug', requireOrgSession, communityController.u
 router.get('/community/posts', communityController.listPosts);
 router.post('/community/posts', requireOrgSession, communityController.createPost);
 
-// Mobile app routes.
-// These must be declared before '/resources/:id', otherwise Express matches
-// 'export' and 'nearby' as an :id parameter.
+// Bulk export, for partner organisations consuming the catalogue and as the
+// backup path for a gitignored database. Must be declared before
+// '/resources/:id', otherwise Express matches 'export' as an :id parameter.
 router.get('/resources/export', mobileController.exportAll);
-router.get('/resources/nearby', mobileController.nearby);
 
 // Resources routes
 router.get('/resources', resourcesController.getAll);

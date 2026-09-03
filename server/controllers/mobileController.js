@@ -75,67 +75,9 @@ const exportAll = (req, res) => {
   });
 };
 
-/**
- * GET /api/resources/nearby?lat=39.09&lng=-94.57&radius=5
- *
- * Returns resources within `radius` miles, nearest first. Entries with no
- * coordinates (hotlines, mobile outreach, confidential shelters) are always
- * appended regardless of radius — someone who needs a crisis line shouldn't
- * have it filtered out by geography.
- */
-const nearby = (req, res) => {
-  const lat = parseFloat(req.query.lat);
-  const lng = parseFloat(req.query.lng);
-  const radius = parseFloat(req.query.radius) || 5;
-  const { category } = req.query;
-
-  if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
-    res.status(400).json({ error: 'lat and lng are required and must be numbers' });
-    return;
-  }
-  if (lat < -90 || lat > 90 || lng < -180 || lng > 180) {
-    res.status(400).json({ error: 'lat/lng out of range' });
-    return;
-  }
-
-  let query = 'SELECT * FROM resources';
-  const params = [];
-  if (category) {
-    query += ' WHERE type = ?';
-    params.push(category);
-  }
-
-  db.getDb().all(query, params, (err, rows) => {
-    if (err) {
-      res.status(500).json({ error: err.message });
-      return;
-    }
-
-    const withDistance = [];
-    const withoutCoordinates = [];
-
-    rows.map(toAppResource).forEach((resource) => {
-      if (resource.latitude == null || resource.longitude == null) {
-        withoutCoordinates.push({ ...resource, distanceMiles: null });
-        return;
-      }
-      const distanceMiles = haversineMiles(lat, lng, resource.latitude, resource.longitude);
-      if (distanceMiles <= radius) {
-        withDistance.push({ ...resource, distanceMiles: Number(distanceMiles.toFixed(2)) });
-      }
-    });
-
-    withDistance.sort((a, b) => a.distanceMiles - b.distanceMiles);
-
-    res.json({
-      version: 1,
-      generated: new Date().toISOString().slice(0, 10),
-      region: 'Kansas City metro (MO + KS)',
-      query: { lat, lng, radius, category: category || null },
-      count: withDistance.length + withoutCoordinates.length,
-      resources: [...withDistance, ...withoutCoordinates]
-    });
-  });
-};
-
-module.exports = { exportAll, nearby, haversineMiles, toAppResource };
+// `nearby` lived here for the iOS app: it duplicated the distance filtering
+// the web already does client-side with haversineMiles, and a second copy of
+// that logic is a second place for it to drift. `exportAll` stays — it is how
+// a partner organisation could consume the catalogue, and the backup path for
+// a database that is gitignored.
+module.exports = { exportAll, haversineMiles, toAppResource };
