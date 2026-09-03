@@ -16,11 +16,19 @@ const OSM_URL = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
 const OSM_ATTRIB =
   '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
 
+// Attribution is a licence condition, not decoration. Stadia require all three
+// credits on their standard styles — theirs, OpenMapTiles, and OpenStreetMap:
+// https://docs.stadiamaps.com/attribution/
+const STADIA_ATTRIB =
+  '&copy; <a href="https://stadiamaps.com/attribution/">Stadia Maps</a> ' +
+  '&copy; <a href="https://openmaptiles.org/">OpenMapTiles</a> ' +
+  '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>';
+
 const TILES = TILE_KEY
   ? {
       dark: `https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png?api_key=${TILE_KEY}`,
       light: `https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png?api_key=${TILE_KEY}`,
-      attribution: `${OSM_ATTRIB} &copy; <a href="https://stadiamaps.com/">Stadia Maps</a>`
+      attribution: STADIA_ATTRIB
     }
   : { dark: OSM_URL, light: OSM_URL, attribution: OSM_ATTRIB };
 
