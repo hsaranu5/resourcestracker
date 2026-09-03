@@ -11,6 +11,7 @@ import CommunityPosts from './components/CommunityPosts';
 import AddPostForm from './components/AddPostForm';
 import CrisisStrip from './components/CrisisStrip';
 import LocationBar from './components/LocationBar';
+import TakeawayView from './components/TakeawayView';
 import Icon from './icons';
 import {
   CATEGORIES, KC_CENTER, OFFLINE_RADIUS_MI,
@@ -46,6 +47,7 @@ function App() {
   const [locating, setLocating] = useState(false);
   const [locationError, setLocationError] = useState('');
   const [selectedForPrint, setSelectedForPrint] = useState(() => new Set());
+  const [showTakeaway, setShowTakeaway] = useState(false);
   const [selectedResource, setSelectedResource] = useState(null);
   const [detailResource, setDetailResource] = useState(null);
   const [offlineSince, setOfflineSince] = useState(null); // savedAt of the standby copy in use
@@ -265,8 +267,14 @@ function App() {
 
         <span className="found-count">
           {filtered.length} found
-          {selectedForPrint.size > 0 && ` · ${selectedForPrint.size} ticked`}
         </span>
+
+        {/* Ticked items if any were ticked, the whole filtered list otherwise —
+            nobody should have to tick 114 boxes to leave with a list. */}
+        <button className="takeaway-button" onClick={() => setShowTakeaway(true)}>
+          <Icon name="print" size={13} />
+          {selectedForPrint.size > 0 ? ` Take ${selectedForPrint.size} with me` : ' Take this list'}
+        </button>
       </div>
     </div>
   );
@@ -309,6 +317,20 @@ function App() {
       (saved {relativeTime(offlineSince)})
     </div>
   ) : null;
+
+  if (showTakeaway) {
+    const picked = selectedForPrint.size > 0
+      ? filtered.filter((r) => selectedForPrint.has(r.id))
+      : filtered;
+    return (
+      <TakeawayView
+        resources={picked}
+        crisisLines={resources.filter((r) => r.type === 'crisis' && r.phone)}
+        origin={origin}
+        onBack={() => setShowTakeaway(false)}
+      />
+    );
+  }
 
   return (
     <div className="App">

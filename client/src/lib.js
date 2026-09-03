@@ -65,6 +65,12 @@ export const buildZipCentroids = (resources) => {
 // skipped and the next crisis entry fills the slot.
 export const PRIORITY_LINES = ['988', '211', 'Hotline for the Homeless'];
 
+// Getting there costs money again. This rode in the iOS app's settings screen,
+// which the web has no equivalent of — it goes on every printout, and (once
+// the Community work lands) pinned to the feed.
+export const TRANSIT_NOTICE =
+  'KC buses are no longer fare-free as of June 1, 2026. Check ridekc.org/fares for passes before you travel.';
+
 export const POST_CATEGORIES = {
   update:  { label: 'Update',  icon: 'megaphone', color: '#4A80E8' },
   alert:   { label: 'Alert',   icon: 'alert',     color: '#E8842C' },
