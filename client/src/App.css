@@ -1661,3 +1661,51 @@ body {
 .takeaway-pages {
   color: var(--muted);
 }
+
+/* ---------- Community ---------- */
+/* Ours, not an organisation's — so it deliberately looks unlike a post and
+   carries no byline. */
+.standing-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  margin: 0 14px 14px;
+  padding: 11px 13px;
+  border-radius: 10px;
+  border-left: 4px solid #e8842c;
+  background: rgba(232, 132, 44, 0.12);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.community-footer {
+  margin: 26px 14px 0;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 13px;
+}
+
+/* ---------- Publishing (/admin) ---------- */
+.admin-app {
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--text);
+}
+
+.admin-main {
+  max-width: 620px;
+  margin: 0 auto;
+  padding: 26px 20px 60px;
+}
+
+.admin-intro {
+  margin: 0 0 18px;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.admin-app .header-action {
+  text-decoration: none;
+}

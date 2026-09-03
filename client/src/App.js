@@ -8,20 +8,29 @@ import ResourceList from './components/ResourceList';
 import ResourceDetail from './components/ResourceDetail';
 import EventsList from './components/EventsList';
 import CommunityPosts from './components/CommunityPosts';
-import AddPostForm from './components/AddPostForm';
+import AdminApp from './components/AdminApp';
 import CrisisStrip from './components/CrisisStrip';
 import LocationBar from './components/LocationBar';
 import TakeawayView, { PRINT_WITHOUT_TICKS_MAX } from './components/TakeawayView';
 import Icon from './icons';
 import {
   CATEGORIES, KC_CENTER, OFFLINE_RADIUS_MI,
-  haversineMiles, saveOffline, loadOffline, relativeTime, buildZipCentroids
+  haversineMiles, saveOffline, loadOffline, relativeTime, buildZipCentroids, TRANSIT_NOTICE
 } from './lib';
 
 const API_URL = process.env.REACT_APP_API_URL || '/api';
 const RADII = [1, 3, 5, 10, 25];
 
+// One extra path, so no router dependency. The dev server and the production
+// catch-all both serve index.html for unknown paths.
+const IS_ADMIN = typeof window !== 'undefined' && window.location.pathname.replace(/\/$/, '') === '/admin';
+
 function App() {
+  if (IS_ADMIN) return <AdminApp />;
+  return <PublicApp />;
+}
+
+function PublicApp() {
   const [theme, setTheme] = useState(() => {
     try {
       const saved = localStorage.getItem('theme');
@@ -419,16 +428,26 @@ function App() {
             Call ahead — times can change.
           </p>
 
+          {/* Standing notice, not a post: it is ours, not an organisation's,
+              so it carries no org byline. It costs money to get anywhere and
+              nothing else on the site says so. */}
+          <div className="standing-notice">
+            <Icon name="alert" size={14} />
+            <span>{TRANSIT_NOTICE}</span>
+          </div>
+
           {communityView === 'events' ? (
             <EventsList ref={eventsRef} userLocation={userLocation} />
           ) : (
             <CommunityPosts ref={postsRef} />
           )}
 
-          <AddPostForm
-            onPostAdded={() => { setCommunityView('posts'); postsRef.current?.refresh(); }}
-            onEventAdded={() => { setCommunityView('events'); eventsRef.current?.refresh(); }}
-          />
+          {/* Publishing lives at /admin, never as a tab — see AdminApp. This
+              line is how a verified org finds it; it is text, not a control,
+              and it names no capability a visitor could act on. */}
+          <p className="community-footer">
+            Verified organization? <a href="/admin">Sign in to publish</a>
+          </p>
         </main>
       )}
 

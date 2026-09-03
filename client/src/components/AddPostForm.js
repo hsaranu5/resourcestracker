@@ -5,15 +5,19 @@ import { CATEGORIES } from '../lib';
 
 const API_URL = process.env.REACT_APP_API_URL || '/api';
 
-// What each post type means — shown under the picker so orgs choose well.
+// Two types, both about whether a trip is worth making.
+//
+// 'Need' is gone: an organisation asking for volunteers and donations is
+// talking to donors, not to someone looking for a shower, and it does not
+// belong in a feed the latter reads. 'Update' is gone too — a catch-all that
+// absorbs everything eventually absorbs the closures, which are the one thing
+// here no street sheet or website can give someone: what changed today.
 const POST_TYPES = [
-  { value: 'update',  label: 'Update',  hint: 'General information the community should know.' },
-  { value: 'alert',   label: 'Alert',   hint: 'Urgent and time-sensitive — weather, safety, big changes. Shown prominently.' },
   { value: 'closure', label: 'Closure', hint: 'A service or location people rely on is closed or suspended. Saves someone the trip.' },
-  { value: 'need',    label: 'Need',    hint: 'Your organization needs something — volunteers, donations, supplies.' }
+  { value: 'alert',   label: 'Alert',   hint: 'Urgent and time-sensitive — weather, safety, big changes. Shown prominently.' }
 ];
 
-const EMPTY_POST = { title: '', content: '', category: 'update' };
+const EMPTY_POST = { title: '', content: '', category: 'closure' };
 const EMPTY_EVENT = {
   title: '', description: '', category: 'food', locationName: '',
   address: '', startsAt: '', endsAt: '', contactPhone: ''

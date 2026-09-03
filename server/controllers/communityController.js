@@ -3,7 +3,17 @@ const db = require('../database');
 const { haversineMiles } = require('./mobileController');
 
 const VALID_CATEGORIES = ['food', 'shelter', 'health', 'hygiene', 'crisis', 'youth', 'veterans', 'support'];
+// Everything that can be READ. 'update' and 'need' are retired but rows
+// carrying them still exist, and a reader that rejected them would blank
+// posts that are already published.
 const VALID_POST_CATEGORIES = ['update', 'alert', 'closure', 'need'];
+
+// Everything that can still be WRITTEN. 'need' is an organisation talking to
+// donors — volunteers, supplies — which does not belong in a feed read by
+// someone looking for a shower. 'update' was a catch-all that absorbed
+// everything else. What remains is the pair that changes whether a trip is
+// worth making.
+const PUBLISHABLE_POST_CATEGORIES = ['alert', 'closure'];
 
 const slugify = (text) =>
   text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 60);
@@ -289,8 +299,8 @@ const createPost = (req, res) => {
     res.status(400).json({ error: 'content is required' });
     return;
   }
-  if (category && !VALID_POST_CATEGORIES.includes(category)) {
-    res.status(400).json({ error: `category must be one of: ${VALID_POST_CATEGORIES.join(', ')}` });
+  if (category && !PUBLISHABLE_POST_CATEGORIES.includes(category)) {
+    res.status(400).json({ error: `category must be one of: ${PUBLISHABLE_POST_CATEGORIES.join(', ')}` });
     return;
   }
   if (expiresAt && !isValidDate(expiresAt)) {
@@ -303,7 +313,7 @@ const createPost = (req, res) => {
      VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       String(title).trim(), String(content).trim(), req.organization, req.organization,
-      category || 'update', pinned ? 1 : 0,
+      category || 'alert', pinned ? 1 : 0,
       // Posts don't linger: a week by default, unless the org sets its own
       // expiry. Stale information costs someone a walk across town.
       expiresAt
