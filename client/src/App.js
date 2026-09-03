@@ -11,7 +11,7 @@ import CommunityPosts from './components/CommunityPosts';
 import AddPostForm from './components/AddPostForm';
 import CrisisStrip from './components/CrisisStrip';
 import LocationBar from './components/LocationBar';
-import TakeawayView from './components/TakeawayView';
+import TakeawayView, { PRINT_WITHOUT_TICKS_MAX } from './components/TakeawayView';
 import Icon from './icons';
 import {
   CATEGORIES, KC_CENTER, OFFLINE_RADIUS_MI,
@@ -269,11 +269,16 @@ function App() {
           {filtered.length} found
         </span>
 
-        {/* Ticked items if any were ticked, the whole filtered list otherwise —
-            nobody should have to tick 114 boxes to leave with a list. */}
+        {/* Ticked items if any were ticked. Unticked, a short list prints as
+            it stands and a long one hits a warning first — printing 114
+            entries is real money at a coin-operated library printer. */}
         <button className="takeaway-button" onClick={() => setShowTakeaway(true)}>
           <Icon name="print" size={13} />
-          {selectedForPrint.size > 0 ? ` Take ${selectedForPrint.size} with me` : ' Take this list'}
+          {selectedForPrint.size > 0
+            ? ` Take ${selectedForPrint.size} with me`
+            : filtered.length <= PRINT_WITHOUT_TICKS_MAX
+              ? ` Take these ${filtered.length} with me`
+              : ' Take a list with me'}
         </button>
       </div>
     </div>
@@ -325,6 +330,7 @@ function App() {
     return (
       <TakeawayView
         resources={picked}
+        ticked={selectedForPrint.size > 0}
         crisisLines={resources.filter((r) => r.type === 'crisis' && r.phone)}
         origin={origin}
         onBack={() => setShowTakeaway(false)}
