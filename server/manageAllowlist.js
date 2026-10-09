@@ -22,14 +22,12 @@ const usage = () => {
 };
 
 const run = async () => {
-  await db.init();
-  await new Promise((resolve) => setTimeout(resolve, 300));
 
   const [cmd, emailArg, orgName, addedBy] = process.argv.slice(2);
   const email = emailArg ? emailArg.trim().toLowerCase() : null;
 
   if (cmd === '--list') {
-    db.getDb().all('SELECT * FROM allowlist ORDER BY org_name', [], (err, rows) => {
+    db.getDb().all('SELECT * FROM allowlist ORDER BY org_name, id', [], (err, rows) => {
       if (err) console.error(err.message);
       else if (!rows.length) console.log('Allowlist is empty. Add trusted org emails with --add.');
       else {
@@ -56,7 +54,7 @@ const run = async () => {
       [email, orgName, addedBy || ''],
       (err) => {
         if (err) {
-          console.error(err.message.includes('UNIQUE') ? `${email} is already on the allowlist.` : err.message);
+          console.error(err.code === '23505' ? `${email} is already on the allowlist.` : err.message);
         } else {
           console.log(`Added ${orgName} <${email}>. They can now sign in with a code sent to that address.`);
         }
@@ -72,13 +70,13 @@ const run = async () => {
       db.close();
       return;
     }
-    db.getDb().run('DELETE FROM allowlist WHERE email = ?', [email], function (err) {
+    db.getDb().run('DELETE FROM allowlist WHERE email = ?', [email], (err, result) => {
       if (err) {
         console.error(err.message);
         db.close();
         return;
       }
-      if (!this.changes) {
+      if (!result.rowCount) {
         console.log('No matching email on the allowlist.');
         db.close();
         return;

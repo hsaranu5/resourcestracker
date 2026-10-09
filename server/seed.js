@@ -172,7 +172,7 @@ const seed = async () => {
 
   for (const org of sampleOrganizations) {
     database.run(
-      'INSERT OR IGNORE INTO organizations (name, website, social_media, description) VALUES (?, ?, ?, ?)',
+      'INSERT INTO organizations (name, website, social_media, description) VALUES (?, ?, ?, ?) ON CONFLICT (name) DO NOTHING',
       [org.name, org.website, org.social_media, org.description],
       (err) => {
         if (err) {

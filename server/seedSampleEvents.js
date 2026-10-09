@@ -100,28 +100,24 @@ const posts = [
 ];
 
 const run = async () => {
-  await db.init();
-  await new Promise((resolve) => setTimeout(resolve, 400));
-  const conn = db.getDb();
-
+  // Every statement is awaited in order: unlike the single SQLite connection,
+  // a pool would otherwise let an insert overtake the delete before it.
   if (process.argv.includes('--clear')) {
-    conn.run("DELETE FROM events WHERE organization = 'Sample Data'", function () {
-      console.log(`Removed ${this.changes} sample events.`);
-      conn.run("DELETE FROM community_posts WHERE organization = 'Sample Data'", function () {
-        console.log(`Removed ${this.changes} sample posts.`);
-        db.close();
-      });
-    });
+    const events = await db.query("DELETE FROM events WHERE organization = 'Sample Data'");
+    console.log(`Removed ${events.rowCount} sample events.`);
+    const posts = await db.query("DELETE FROM community_posts WHERE organization = 'Sample Data'");
+    console.log(`Removed ${posts.rowCount} sample posts.`);
+    await db.close();
     return;
   }
 
   // Clear previous sample rows first so re-running doesn't pile up duplicates.
-  conn.run("DELETE FROM events WHERE organization = 'Sample Data'");
-  conn.run("DELETE FROM community_posts WHERE organization = 'Sample Data'");
+  await db.query("DELETE FROM events WHERE organization = 'Sample Data'");
+  await db.query("DELETE FROM community_posts WHERE organization = 'Sample Data'");
 
-  events.forEach((e) => {
+  for (const e of events) {
     const slug = `${e.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 40)}-${crypto.randomBytes(3).toString('hex')}`;
-    conn.run(
+    await db.query(
       `INSERT INTO events (slug, title, description, organization, category, location_name,
          address, city, state, zip_code, latitude, longitude, starts_at, ends_at,
          status, cancellation_note, contact_phone, posted_by)
@@ -131,21 +127,19 @@ const run = async () => {
        e.starts_at, e.ends_at, e.status || 'scheduled', e.cancellation_note || '',
        e.contact_phone, e.organization]
     );
-  });
+  }
 
-  posts.forEach((p) => {
-    conn.run(
+  for (const p of posts) {
+    await db.query(
       `INSERT INTO community_posts (title, content, author, organization, category, pinned)
        VALUES (?,?,?,?,?,?)`,
       [p.title, p.content, p.organization, p.organization, p.category, p.pinned]
     );
-  });
+  }
 
-  setTimeout(() => {
-    console.log(`Seeded ${events.length} sample events (1 cancelled) and ${posts.length} posts.`);
-    console.log("All attributed to 'Sample Data'. Remove with --clear.");
-    db.close();
-  }, 500);
+  console.log(`Seeded ${events.length} sample events (1 cancelled) and ${posts.length} posts.`);
+  console.log("All attributed to 'Sample Data'. Remove with --clear.");
+  await db.close();
 };
 
 run().catch((err) => {

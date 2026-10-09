@@ -1,5 +1,5 @@
 /**
- * Loads data/resources.json into SQLite.
+ * Loads data/resources.json into Postgres (DATABASE_URL).
  *
  * Idempotent: rows are matched on `slug`, so running this repeatedly updates
  * existing rows rather than duplicating them. That makes it safe to re-run
@@ -49,12 +49,12 @@ const upsert = (resource) =>
     const sql = `
       INSERT INTO resources (${columns.join(', ')})
       VALUES (${placeholders})
-      ON CONFLICT(slug) DO UPDATE SET ${updates}, updated_at = CURRENT_TIMESTAMP
+      ON CONFLICT(slug) DO UPDATE SET ${updates}, updated_at = utc_now_text()
     `;
 
-    db.getDb().run(sql, Object.values(row), function (err) {
+    db.getDb().run(sql, Object.values(row), (err, result) => {
       if (err) reject(err);
-      else resolve(this.changes);
+      else resolve(result.rowCount);
     });
   });
 
@@ -64,9 +64,6 @@ const run = async () => {
     process.exit(1);
   }
 
-  await db.init();
-  // Give the schema migration a moment to finish before inserting.
-  await new Promise((resolve) => setTimeout(resolve, 300));
 
   const payload = JSON.parse(fs.readFileSync(JSON_PATH, 'utf8'));
   console.log(`Seeding ${payload.resources.length} resources from ${payload.generated}...`);
@@ -87,7 +84,7 @@ const run = async () => {
   console.log(`\nSeeded ${ok} resources (${failed} failed).`);
   console.log(`${withCoords} have coordinates; the app geocodes the rest on first launch.`);
 
-  db.close();
+  await db.close();
 };
 
 run().catch((err) => {

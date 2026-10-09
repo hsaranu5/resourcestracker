@@ -32,16 +32,14 @@ const run = async () => {
     process.exit(1);
   }
 
-  await db.init();
-  await new Promise((resolve) => setTimeout(resolve, 400));
   const conn = db.getDb();
 
   const payload = JSON.parse(fs.readFileSync(JSON_PATH, 'utf8'));
   const { events } = payload;
 
   if (process.argv.includes('--clear')) {
-    conn.run("DELETE FROM events WHERE posted_by = 'street-sheet'", function () {
-      console.log(`Removed ${this.changes} Street Sheet events.`);
+    conn.run("DELETE FROM events WHERE posted_by = 'street-sheet'", (err, result) => {
+      console.log(`Removed ${result ? result.rowCount : 0} Street Sheet events.`);
       db.close();
     });
     return;
@@ -93,7 +91,7 @@ const run = async () => {
   console.log('\nNote: these have no coordinates yet, so they show without a distance.');
   console.log('The addresses all exist in resources.csv — see README for linking them.');
 
-  db.close();
+  await db.close();
 };
 
 run().catch((err) => {
