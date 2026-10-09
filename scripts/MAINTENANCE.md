@@ -1,5 +1,27 @@
 # Keeping the server healthy
 
+> **On Vercel + Supabase none of the host setup below
+> applies.** There is no long-running process to keep alive or restart. Two
+> Vercel Cron Jobs in `vercel.json` do the scheduled work:
+>
+> | Path | Schedule (UTC) | Does |
+> |---|---|---|
+> | `/api/cron/archive` | daily, 04:00 | `archiveExpired()` — moves past events and expired posts into the `community_archive` table (was `data/archive.json`, every 6 h); prunes stale rate-limit rows |
+> | `/api/cron/maintenance` | Mondays, 05:05 | `server/maintenance.js` — prunes expired sessions, codes and posts; moves old events to `events_archive` |
+>
+> Vercel Hobby runs crons at most once a day and only to the hour, so each job
+> fires some time within its hour. Both routes need `CRON_SECRET` set in the
+> Vercel project. Run either job by hand against the same database with
+> `npm run archive` or `npm run maintenance`.
+>
+> The Street Sheet events roll (`data/generate_events.py` + `server/seedEvents.js`)
+> needs Python and the repo's `data/` folder, so it does not run on Vercel. Run
+> it from a machine with `DATABASE_URL` pointing at Supabase.
+>
+> There is no `VACUUM` step any more: Postgres's autovacuum reclaims space on its own.
+>
+> The rest of this file describes the earlier self-hosted SQLite setup.
+
 Two separate jobs, often confused:
 
 1. **Keep the server running** — auto-start on boot, restart if it crashes.

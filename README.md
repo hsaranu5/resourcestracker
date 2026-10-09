@@ -18,7 +18,8 @@ A comprehensive application for tracking homelessness resources including food, 
 
 - **Frontend**: React with Leaflet maps
 - **Backend**: Node.js with Express
-- **Database**: SQLite
+- **Database**: Postgres (Supabase in production)
+- **Hosting**: Vercel — static client build plus one serverless function for `/api` (see `DEPLOY.md`)
 - **Maps**: OpenStreetMap via Leaflet (no API key required)
 
 ## Installation
@@ -41,15 +42,17 @@ A comprehensive application for tracking homelessness resources including food, 
    ```bash
    cp .env.example .env
    ```
+   Set `DATABASE_URL` — a local Postgres works (`createdb kcr_dev`, then
+   `DATABASE_URL=postgres://localhost/kcr_dev`), or a Supabase dev project.
    Edit `.env` to change the port (default 5001) or to turn on real email delivery
    (see [Email delivery](#email-delivery) below).
 
-4. **Seed the database** — required, and easy to miss:
+4. **Create the tables and seed the database** — required, and easy to miss:
    ```bash
+   npm run db:schema
    npm run seed
    ```
-   `resources.db` is gitignored, so a fresh clone starts with an empty database
-   and the map will show no locations until this is run. The seed loads the 116
+   A fresh database is empty, and the map will show no locations until this is run. The seed loads the 116
    resources from `data/resources.json`; it matches on `slug`, so re-running it
    updates rows instead of duplicating them.
 
@@ -165,11 +168,18 @@ migration is only a change of `SMTP_HOST` / `SMTP_USER` / `SMTP_PASS` / `MAIL_FR
 
 ## Database Schema
 
-The application uses SQLite with the following tables:
+The application uses Postgres. `server/schema.sql` is the full definition
+(apply it with `npm run db:schema`). The main tables:
 
 - **resources**: Stores resource information with location data
 - **community_posts**: Stores community posts
+- **events**: One-off and pop-up events
 - **organizations**: Tracks organizations that provide resources
+- **allowlist**, **auth_codes**, **sessions**: verified-poster sign-in
+- **community_archive**, **events_archive**: expired posts and past events
+- **rate_limit_hits**: sign-in rate limiting, shared by every server instance
+
+Moving off the old SQLite file is a one-time `npm run db:migrate-sqlite`; see `DEPLOY.md`.
 
 ## Adding Sample Data
 

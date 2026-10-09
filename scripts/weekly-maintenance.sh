@@ -5,7 +5,7 @@
 #
 #   1. Roll the events window forward   (Street Sheet clinics stay populated)
 #   2. Load the regenerated events      (seedEvents.js)
-#   3. Prune + archive + compact the DB (maintenance.js — the real cache free-age)
+#   3. Prune + archive the DB           (maintenance.js — the real cache free-age)
 #   4. Restart the server process       (clean process, picks up new data)
 #
 # Designed to be invoked by the OS scheduler (systemd timer on Linux, launchd on
@@ -42,7 +42,7 @@ else
   node server/seedEvents.js
 fi
 
-echo "$LOG_PREFIX pruning + archiving + compacting database"
+echo "$LOG_PREFIX pruning + archiving database"
 node server/maintenance.js
 
 if [ -n "${RESTART_CMD:-}" ]; then
