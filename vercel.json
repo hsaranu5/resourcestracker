@@ -1,0 +1,15 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": null,
+  "installCommand": "npm install --omit=dev && npm --prefix client install",
+  "buildCommand": "CI=false npm --prefix client run build",
+  "outputDirectory": "client/build",
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "/api" },
+    { "source": "/(.*)", "destination": "/index.html" }
+  ],
+  "crons": [
+    { "path": "/api/cron/archive", "schedule": "0 4 * * *" },
+    { "path": "/api/cron/maintenance", "schedule": "5 5 * * 1" }
+  ]
+}
