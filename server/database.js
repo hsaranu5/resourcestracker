@@ -1,258 +1,136 @@
-const sqlite3 = require('sqlite3').verbose();
-const path = require('path');
-
-const DB_PATH = path.join(__dirname, 'resources.db');
-
-let db = null;
-
-const init = () => {
-  return new Promise((resolve, reject) => {
-    db = new sqlite3.Database(DB_PATH, (err) => {
-      if (err) {
-        console.error('Error opening database:', err);
-        reject(err);
-        return;
-      }
-      console.log('Connected to SQLite database');
-      createTables();
-      resolve();
-    });
-  });
-};
-
-const createTables = () => {
-  // Resources table
-  db.run(`
-    CREATE TABLE IF NOT EXISTS resources (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      name TEXT NOT NULL,
-      organization TEXT,
-      type TEXT NOT NULL,
-      description TEXT,
-      address TEXT NOT NULL,
-      city TEXT,
-      state TEXT,
-      zip_code TEXT,
-      latitude REAL,
-      longitude REAL,
-      phone TEXT,
-      website TEXT,
-      hours TEXT,
-      source TEXT,
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
-    )
-  `, () => migrateResources());
-
-  // Community posts table
-  db.run(`
-    CREATE TABLE IF NOT EXISTS community_posts (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      title TEXT NOT NULL,
-      content TEXT NOT NULL,
-      author TEXT,
-      resource_id INTEGER,
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY (resource_id) REFERENCES resources(id)
-    )
-  `);
-
-  // Events: one-off and pop-up happenings the static resource hours can't express.
-  // A mobile pantry this Saturday, a clinic bus at a specific camp, a resource fair.
-  //
-  // Note `status`: events are cancelled, never deleted. Someone may have already
-  // planned their day around one, so a cancellation has to be visible rather than
-  // the event silently vanishing.
-  db.run(`
-    CREATE TABLE IF NOT EXISTS events (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      slug TEXT UNIQUE,
-      title TEXT NOT NULL,
-      description TEXT,
-      organization TEXT NOT NULL,
-      category TEXT NOT NULL DEFAULT 'support',
-      location_name TEXT,
-      address TEXT,
-      city TEXT,
-      state TEXT,
-      zip_code TEXT,
-      latitude REAL,
-      longitude REAL,
-      starts_at TEXT NOT NULL,
-      ends_at TEXT,
-      status TEXT NOT NULL DEFAULT 'scheduled',
-      cancellation_note TEXT,
-      contact_phone TEXT,
-      resource_slug TEXT,
-      posted_by TEXT,
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
-    )
-  `);
-  db.run('CREATE INDEX IF NOT EXISTS idx_events_starts_at ON events(starts_at)');
-
-  // --- Verified poster auth (see design/VERIFIED-POSTER-AUTH.md) ---
-  //
-  // No passwords, no pre-created accounts: the allowlist IS the account system.
-  // Care Beyond adds trusted org emails; login is a 6-digit code sent to that
-  // email. Removing a row revokes access instantly.
-
-  // Who may post. `org_name` is stamped onto posts server-side — never taken
-  // from client input.
-  db.run(`
-    CREATE TABLE IF NOT EXISTS allowlist (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      email TEXT NOT NULL UNIQUE COLLATE NOCASE,
-      org_name TEXT NOT NULL,
-      added_by TEXT,
-      added_at DATETIME DEFAULT CURRENT_TIMESTAMP
-    )
-  `);
-
-  // Short-lived login codes. Only the hash is stored; codes expire in 10
-  // minutes and allow a handful of attempts before burning out.
-  db.run(`
-    CREATE TABLE IF NOT EXISTS auth_codes (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      email TEXT NOT NULL COLLATE NOCASE,
-      code_hash TEXT NOT NULL,
-      expires_at TEXT NOT NULL,
-      attempts INTEGER NOT NULL DEFAULT 0,
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-    )
-  `);
-  db.run('CREATE INDEX IF NOT EXISTS idx_auth_codes_email ON auth_codes(email)');
-
-  // Sessions issued after a correct code. Token hashes only — a leaked
-  // database must not yield usable sessions. Default lifetime is hours;
-  // 30 days only when the poster explicitly opted in ("remember this device").
-  db.run(`
-    CREATE TABLE IF NOT EXISTS sessions (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      token_hash TEXT NOT NULL UNIQUE,
-      email TEXT NOT NULL COLLATE NOCASE,
-      org_name TEXT NOT NULL,
-      expires_at TEXT NOT NULL,
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-      last_used_at DATETIME
-    )
-  `);
-  db.run('CREATE INDEX IF NOT EXISTS idx_sessions_expires ON sessions(expires_at)');
-
-  // Organizations table
-  db.run(`
-    CREATE TABLE IF NOT EXISTS organizations (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      name TEXT NOT NULL UNIQUE,
-      website TEXT,
-      social_media TEXT,
-      description TEXT,
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-    )
-  `);
-};
-
 /**
- * Adds the columns the mobile app needs to an existing resources table.
+ * Postgres (Supabase) access, configured from DATABASE_URL.
  *
- * Runs on every boot. SQLite has no "ADD COLUMN IF NOT EXISTS", so we read the
- * current schema first and only add what's missing — that keeps this safe to
- * run against a database created before these fields existed.
+ * The schema lives in server/schema.sql and is applied with `npm run db:schema`
+ * — not at boot, because on Vercel every cold start would re-run it.
+ *
+ * Two ways in:
+ *   - query(sql, params) → Promise<pg.Result>   (rows, rowCount)
+ *   - getDb().all/get/run(sql, params, cb)      the callback shape the
+ *     controllers were written against with sqlite3. `run` hands the pg result
+ *     to the callback as its second argument; there is no `this.lastID` or
+ *     `this.changes` — use `RETURNING id` and `result.rowCount`.
+ *
+ * SQL keeps sqlite's `?` placeholders; they are rewritten to $1, $2, ... here.
+ * That rewrite is a plain character replace, so no query may contain a literal
+ * `?` (none do).
  */
-const migrateResources = () => {
-  const columns = {
-    slug: 'TEXT',            // stable string id shared with the app + CSV
-    services: 'TEXT',        // semicolon-separated list
-    eligibility: 'TEXT',     // who the service is for
-    verified: 'INTEGER DEFAULT 0'
-  };
 
-  db.all('PRAGMA table_info(resources)', [], (err, rows) => {
-    if (err) {
-      console.error('Could not inspect resources table:', err.message);
-      return;
-    }
-    const existing = new Set(rows.map((r) => r.name));
-    const missing = Object.entries(columns).filter(([column]) => !existing.has(column));
+require('dotenv').config();
+const { Pool, types } = require('pg');
 
-    // The index can only be created after the ALTERs have run — creating it
-    // while the slug column is still being added crashed the process on a
-    // fresh database. Count the ALTERs down, then index, with an error
-    // callback so a failure logs instead of emitting an unhandled 'error'.
-    let pending = missing.length;
-    const createSlugIndex = () => {
-      // Unique slug lets the seeder upsert instead of duplicating on every run.
-      db.run('CREATE UNIQUE INDEX IF NOT EXISTS idx_resources_slug ON resources(slug)', (idxErr) => {
-        if (idxErr) console.error('Could not create slug index:', idxErr.message);
-      });
-    };
+// COUNT(*) and other bigint results arrive as strings by default. SQLite gave
+// numbers, and maintenance.js does arithmetic on them.
+types.setTypeParser(types.builtins.INT8, (value) => parseInt(value, 10));
 
-    if (pending === 0) {
-      createSlugIndex();
-    } else {
-      missing.forEach(([column, type]) => {
-        db.run(`ALTER TABLE resources ADD COLUMN ${column} ${type}`, (alterErr) => {
-          if (alterErr) {
-            console.error(`Failed adding column ${column}:`, alterErr.message);
-          } else {
-            console.log(`Added resources.${column}`);
-          }
-          if (--pending === 0) createSlugIndex();
-        });
-      });
-    }
+let pool = null;
+
+const isLocalUrl = (url) => /@(localhost|127\.0\.0\.1|\[::1\])[:/]/.test(url) || !url.includes('@');
+
+const sslFor = (url) => {
+  if (isLocalUrl(url) || process.env.DATABASE_SSL === 'disable') return false;
+  // Supabase serves a certificate from its own CA. With DATABASE_CA_CERT set
+  // (the PEM from Project Settings → Database) the chain is verified;
+  // without it the connection is still encrypted but the server isn't
+  // authenticated.
+  if (process.env.DATABASE_CA_CERT) {
+    return { ca: process.env.DATABASE_CA_CERT.replace(/\\n/g, '\n'), rejectUnauthorized: true };
+  }
+  return { rejectUnauthorized: false };
+};
+
+const getPool = () => {
+  if (pool) return pool;
+  const connectionString = process.env.DATABASE_URL;
+  if (!connectionString) throw new Error('DATABASE_URL is not set');
+  pool = new Pool({
+    connectionString,
+    ssl: sslFor(connectionString),
+    // Each serverless instance holds its own pool; keep it small so many
+    // instances don't exhaust Supabase's connection limit.
+    max: Number(process.env.PG_POOL_MAX) || 5,
+    idleTimeoutMillis: 10000
   });
+  pool.on('error', (err) => console.error('Postgres pool error:', err.message));
+  return pool;
+};
 
-  migrateCommunityPosts();
+const toPg = (sql) => {
+  let n = 0;
+  return sql.replace(/\?/g, () => `$${++n}`);
+};
+
+const query = (sql, params = []) => getPool().query(toPg(sql), params);
+
+// Callback adapter. `params` may be omitted, as sqlite3 allowed.
+const call = (pick) => (sql, params, cb) => {
+  if (typeof params === 'function') {
+    cb = params;
+    params = [];
+  }
+  query(sql, params || []).then(
+    (result) => cb && cb(null, pick(result)),
+    (err) => {
+      if (cb) cb(err);
+      else console.error('Query failed:', err.message);
+    }
+  );
+};
+
+const adapter = {
+  all: call((result) => result.rows),
+  get: call((result) => result.rows[0]),
+  run: call((result) => result)
+};
+
+/** Run `fn(client)` inside BEGIN/COMMIT, rolling back if it throws. */
+const transaction = async (fn) => {
+  const client = await getPool().connect();
+  try {
+    await client.query('BEGIN');
+    const result = await fn({ query: (sql, params = []) => client.query(toPg(sql), params) });
+    await client.query('COMMIT');
+    return result;
+  } catch (err) {
+    await client.query('ROLLBACK').catch(() => {});
+    throw err;
+  } finally {
+    client.release();
+  }
+};
+
+/** Opens the pool and checks the database answers. */
+const init = async () => {
+  await query('SELECT 1');
+  console.log('Connected to Postgres');
+};
+
+const getDb = () => adapter;
+
+const close = async () => {
+  if (!pool) return;
+  const closing = pool;
+  pool = null;
+  await closing.end();
 };
 
 /**
- * Brings the pre-existing community_posts table up to what the mobile app needs:
- * an owning organisation (posts are org-authored, not anonymous), a category,
- * and a pinned flag for things like cold-weather alerts.
+ * True when `value` can match an integer id column. SQLite compared
+ * `id = 'abc'` as simply false; Postgres rejects the query instead, so
+ * callers check first to keep returning 404 rather than 500.
  */
-const migrateCommunityPosts = () => {
-  const columns = {
-    organization: 'TEXT',
-    category: "TEXT DEFAULT 'update'",
-    pinned: 'INTEGER DEFAULT 0',
-    expires_at: 'TEXT'
-  };
-
-  db.all('PRAGMA table_info(community_posts)', [], (err, rows) => {
-    if (err) return;
-    const existing = new Set(rows.map((r) => r.name));
-    Object.entries(columns).forEach(([column, type]) => {
-      if (existing.has(column)) return;
-      db.run(`ALTER TABLE community_posts ADD COLUMN ${column} ${type}`, (e) => {
-        if (!e) console.log(`Added community_posts.${column}`);
-      });
-    });
-  });
-};
-
-const getDb = () => {
-  if (!db) {
-    throw new Error('Database not initialized');
-  }
-  return db;
-};
-
-const close = () => {
-  if (db) {
-    db.close((err) => {
-      if (err) {
-        console.error('Error closing database:', err);
-      } else {
-        console.log('Database connection closed');
-      }
-    });
-  }
+const isRowId = (value) => {
+  const s = String(value);
+  if (!/^-?\d+$/.test(s)) return false;
+  const n = Number(s);
+  return n >= -2147483648 && n <= 2147483647;
 };
 
 module.exports = {
   init,
   getDb,
-  close
+  query,
+  transaction,
+  close,
+  isRowId
 };
-
