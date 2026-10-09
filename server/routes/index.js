@@ -8,6 +8,7 @@ const mobileController = require('../controllers/mobileController');
 const communityController = require('../controllers/communityController');
 const authController = require('../controllers/authController');
 const requireOrgSession = require('../middleware/requireOrgSession');
+const cronController = require('../controllers/cronController');
 
 // Verified poster auth (design/VERIFIED-POSTER-AUTH.md).
 // Passwordless: allowlisted email → 6-digit code → session.
@@ -44,6 +45,12 @@ router.get('/search', searchController.search);
 // posting now goes through /community/posts behind requireOrgSession.
 router.get('/posts', postsController.getAll);
 router.get('/posts/:id', postsController.getById);
+
+// Scheduled jobs, called by Vercel Cron (vercel.json). They replace the
+// setInterval that ran archiveExpired inside the old long-lived server, and
+// the OS timer that ran maintenance.js. Locked to the CRON_SECRET bearer.
+router.get('/cron/archive', cronController.requireCronSecret, cronController.archive);
+router.get('/cron/maintenance', cronController.requireCronSecret, cronController.maintenance);
 
 // Organizations routes
 router.get('/organizations', organizationsController.getAll);

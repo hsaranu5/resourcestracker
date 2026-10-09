@@ -1,12 +1,14 @@
 /**
- * Weekly maintenance: prune transient rows, archive past events, compact the DB.
+ * Weekly maintenance: prune transient rows and archive past events.
  *
- *   node server/maintenance.js
+ *   node server/maintenance.js          (by hand, against DATABASE_URL)
+ *   GET /api/cron/maintenance           (Vercel Cron, weekly — see vercel.json)
  *
  * This is the part a process restart CANNOT do. Expired sessions, used login
- * codes, and stale posts live in the SQLite file and survive a reboot — a fresh
- * process just re-opens the same file. And SQLite never shrinks its file on
- * DELETE on its own; VACUUM is what actually reclaims the space.
+ * codes, and stale posts live in the database and survive any restart.
+ *
+ * There is no VACUUM step any more. It existed to shrink the SQLite file;
+ * Postgres reclaims dead rows itself with autovacuum.
  *
  * What it PRESERVES ("lifetime" data — never touched here):
  *   - allowlist   (org accounts)
@@ -19,6 +21,8 @@
  *   - auth_codes past their expiry
  *   - community_posts past their expiry
  *   - events that ended more than ARCHIVE_AFTER_DAYS ago -> moved to events_archive
+ *   - login rate-limit counters older than an hour (the old in-memory limiter
+ *     dropped them on the same horizon)
  *
  * Idempotent and safe to run anytime; nothing here depends on it being midnight.
  */
@@ -27,24 +31,13 @@ const db = require('./database');
 
 const ARCHIVE_AFTER_DAYS = 7;
 
-const run = (sql, params = []) =>
-  new Promise((resolve, reject) => {
-    db.getDb().run(sql, params, function (err) {
-      if (err) reject(err);
-      else resolve(this ? this.changes : 0);
-    });
-  });
+const run = async (sql, params = []) => (await db.query(sql, params)).rowCount;
 
-const get = (sql, params = []) =>
-  new Promise((resolve, reject) => {
-    db.getDb().get(sql, params, (err, row) => (err ? reject(err) : resolve(row)));
-  });
+const get = async (sql, params = []) => (await db.query(sql, params)).rows[0];
+
+const pruneRateLimits = () => run("DELETE FROM rate_limit_hits WHERE hit_at < now() - interval '1 hour'");
 
 async function maintain() {
-  await db.init();
-  // Let the schema/migrations settle before we touch the tables.
-  await new Promise((r) => setTimeout(r, 300));
-
   const now = new Date().toISOString();
   const archiveCutoff = new Date(Date.now() - ARCHIVE_AFTER_DAYS * 86400000).toISOString();
   const summary = {};
@@ -61,54 +54,52 @@ async function maintain() {
 
   // 4. Archive events that finished more than a week ago. Moved, not dropped,
   //    so the history survives (a coordinator may want to see what ran).
-  await run(`
-    CREATE TABLE IF NOT EXISTS events_archive (
-      id INTEGER, slug TEXT, title TEXT, description TEXT, organization TEXT,
-      category TEXT, location_name TEXT, address TEXT, city TEXT, state TEXT,
-      zip_code TEXT, latitude REAL, longitude REAL, starts_at TEXT, ends_at TEXT,
-      status TEXT, cancellation_note TEXT, contact_phone TEXT, resource_slug TEXT,
-      posted_by TEXT, created_at DATETIME, updated_at DATETIME,
-      archived_at DATETIME DEFAULT CURRENT_TIMESTAMP
-    )
-  `);
-
+  //    events_archive is created by server/schema.sql. Copy and delete share
+  //    one transaction so a failure can't leave an event in both places.
   const pastClause = 'COALESCE(ends_at, starts_at) < ?';
   const toArchive = await get(`SELECT COUNT(*) AS n FROM events WHERE ${pastClause}`, [archiveCutoff]);
   summary.eventsArchived = toArchive ? toArchive.n : 0;
 
   if (summary.eventsArchived > 0) {
-    await run(`
-      INSERT INTO events_archive (
-        id, slug, title, description, organization, category, location_name,
-        address, city, state, zip_code, latitude, longitude, starts_at, ends_at,
-        status, cancellation_note, contact_phone, resource_slug, posted_by,
-        created_at, updated_at
-      )
-      SELECT id, slug, title, description, organization, category, location_name,
-        address, city, state, zip_code, latitude, longitude, starts_at, ends_at,
-        status, cancellation_note, contact_phone, resource_slug, posted_by,
-        created_at, updated_at
-      FROM events WHERE ${pastClause}
-    `, [archiveCutoff]);
-    await run(`DELETE FROM events WHERE ${pastClause}`, [archiveCutoff]);
+    await db.transaction(async (tx) => {
+      await tx.query(`
+        INSERT INTO events_archive (
+          id, slug, title, description, organization, category, location_name,
+          address, city, state, zip_code, latitude, longitude, starts_at, ends_at,
+          status, cancellation_note, contact_phone, resource_slug, posted_by,
+          created_at, updated_at
+        )
+        SELECT id, slug, title, description, organization, category, location_name,
+          address, city, state, zip_code, latitude, longitude, starts_at, ends_at,
+          status, cancellation_note, contact_phone, resource_slug, posted_by,
+          created_at, updated_at
+        FROM events WHERE ${pastClause}
+      `, [archiveCutoff]);
+      await tx.query(`DELETE FROM events WHERE ${pastClause}`, [archiveCutoff]);
+    });
   }
 
-  // 5. Compact the file. This is the actual disk reclaim — without it the file
-  //    stays as large as its historical high-water mark. VACUUM can't run inside
-  //    a transaction, so it goes last and alone.
-  await run('VACUUM');
+  // 5. Rate-limit counters nobody has touched in an hour.
+  summary.rateLimitHits = await pruneRateLimits();
 
   console.log(`[maintenance] ${new Date().toISOString()}`);
   console.log(`  sessions pruned:   ${summary.sessions}`);
   console.log(`  auth codes pruned: ${summary.authCodes}`);
   console.log(`  posts pruned:      ${summary.posts}`);
   console.log(`  events archived:   ${summary.eventsArchived}`);
-  console.log('  database compacted (VACUUM)');
+  console.log(`  rate-limit hits pruned: ${summary.rateLimitHits}`);
 
-  db.close();
+  return summary;
 }
 
-maintain().catch((err) => {
-  console.error('[maintenance] failed:', err.message);
-  process.exit(1);
-});
+module.exports = { maintain, pruneRateLimits };
+
+if (require.main === module) {
+  maintain()
+    .then(() => db.close())
+    .catch(async (err) => {
+      console.error('[maintenance] failed:', err.message);
+      await db.close();
+      process.exit(1);
+    });
+}
