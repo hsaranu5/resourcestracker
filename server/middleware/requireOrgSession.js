@@ -32,7 +32,7 @@ const readCookie = (req, name) => {
   return null;
 };
 
-const requireOrgSession = (req, res, next) => {
+const requireOrgSession = async (req, res, next) => {
   const bearer = (req.get('authorization') || '').match(/^Bearer\s+(.+)$/i);
   const token = (bearer && bearer[1].trim()) || readCookie(req, COOKIE_NAME);
 
@@ -41,45 +41,39 @@ const requireOrgSession = (req, res, next) => {
     return;
   }
 
-  db.getDb().get(
-    'SELECT * FROM sessions WHERE token_hash = ?',
-    [sha256(token)],
-    (err, session) => {
-      if (err) {
-        res.status(500).json({ error: err.message });
-        return;
-      }
-      // Same message for unknown and expired — nothing to learn from the difference.
-      if (!session || new Date(session.expires_at).getTime() < Date.now()) {
-        if (session) db.getDb().run('DELETE FROM sessions WHERE id = ?', [session.id]);
-        res.status(401).json({ error: 'Session expired. Sign in again.' });
-        return;
-      }
+  // Writes are awaited before replying: on Vercel the function can be frozen
+  // as soon as the response is sent, so a fire-and-forget query may never run.
+  try {
+    const { rows: [session] } = await db.query('SELECT * FROM sessions WHERE token_hash = ?', [sha256(token)]);
 
-      // The allowlist is checked on every request, not just at login: removing
-      // an org must cut off their existing sessions immediately.
-      db.getDb().get('SELECT * FROM allowlist WHERE email = ?', [session.email], (allowErr, org) => {
-        if (allowErr) {
-          res.status(500).json({ error: allowErr.message });
-          return;
-        }
-        if (!org) {
-          db.getDb().run('DELETE FROM sessions WHERE id = ?', [session.id]);
-          res.status(401).json({ error: 'Session expired. Sign in again.' });
-          return;
-        }
-
-        req.organization = org.org_name; // always current, never client-supplied
-        req.sessionEmail = session.email;
-        req.sessionId = session.id;
-
-        // Best-effort audit trail; failure here shouldn't block the request.
-        db.getDb().run('UPDATE sessions SET last_used_at = CURRENT_TIMESTAMP WHERE id = ?', [session.id]);
-
-        next();
-      });
+    // Same message for unknown and expired — nothing to learn from the difference.
+    if (!session || new Date(session.expires_at).getTime() < Date.now()) {
+      if (session) await db.query('DELETE FROM sessions WHERE id = ?', [session.id]);
+      res.status(401).json({ error: 'Session expired. Sign in again.' });
+      return;
     }
-  );
+
+    // The allowlist is checked on every request, not just at login: removing
+    // an org must cut off their existing sessions immediately.
+    const { rows: [org] } = await db.query('SELECT * FROM allowlist WHERE email = ?', [session.email]);
+    if (!org) {
+      await db.query('DELETE FROM sessions WHERE id = ?', [session.id]);
+      res.status(401).json({ error: 'Session expired. Sign in again.' });
+      return;
+    }
+
+    req.organization = org.org_name; // always current, never client-supplied
+    req.sessionEmail = session.email;
+    req.sessionId = session.id;
+
+    // Best-effort audit trail; failure here shouldn't block the request.
+    await db.query('UPDATE sessions SET last_used_at = utc_now_text() WHERE id = ?', [session.id]).catch(() => {});
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+    return;
+  }
+
+  next();
 };
 
 module.exports = requireOrgSession;

@@ -16,18 +16,19 @@ const create = (req, res) => {
   const query = `
     INSERT INTO organizations (name, website, social_media, description)
     VALUES (?, ?, ?, ?)
+    RETURNING id
   `;
 
-  db.getDb().run(query, [name, website, social_media, description], function(err) {
+  db.getDb().run(query, [name, website, social_media, description], (err, result) => {
     if (err) {
-      if (err.message.includes('UNIQUE constraint')) {
+      if (err.code === '23505') { // unique_violation
         res.status(409).json({ error: 'Organization already exists' });
         return;
       }
       res.status(500).json({ error: err.message });
       return;
     }
-    res.status(201).json({ id: this.lastID, ...req.body });
+    res.status(201).json({ id: result.rows[0].id, ...req.body });
   });
 };
 

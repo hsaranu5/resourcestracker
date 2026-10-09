@@ -97,7 +97,7 @@ const listEvents = (req, res) => {
     sql += ' AND category = ?';
     params.push(category);
   }
-  sql += ' ORDER BY starts_at ASC';
+  sql += ' ORDER BY starts_at ASC, id'; // id: SQLite's tie order
 
   db.getDb().all(sql, params, (err, rows) => {
     if (err) {
@@ -171,6 +171,7 @@ const createEvent = (req, res) => {
       city, state, zip_code, latitude, longitude, starts_at, ends_at,
       contact_phone, resource_slug, posted_by
     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    RETURNING id
   `;
 
   db.getDb().run(
@@ -182,12 +183,12 @@ const createEvent = (req, res) => {
       new Date(startsAt).toISOString(), endsAt ? new Date(endsAt).toISOString() : null,
       contactPhone || '', resourceId || null, req.organization
     ],
-    function (err) {
+    (err, result) => {
       if (err) {
         res.status(500).json({ error: err.message });
         return;
       }
-      db.getDb().get('SELECT * FROM events WHERE id = ?', [this.lastID], (e, row) => {
+      db.getDb().get('SELECT * FROM events WHERE id = ?', [result.rows[0].id], (e, row) => {
         if (e) {
           res.status(500).json({ error: e.message });
           return;
@@ -239,7 +240,7 @@ const updateEvent = (req, res) => {
 
     db.getDb().run(
       `UPDATE events SET title = ?, description = ?, starts_at = ?, ends_at = ?,
-         status = ?, cancellation_note = ?, contact_phone = ?, updated_at = CURRENT_TIMESTAMP
+         status = ?, cancellation_note = ?, contact_phone = ?, updated_at = utc_now_text()
        WHERE slug = ?`,
       [...Object.values(updated), slug],
       (updateErr) => {
@@ -269,7 +270,7 @@ const listPosts = (req, res) => {
   db.getDb().all(
     `SELECT * FROM community_posts
      WHERE expires_at IS NULL OR expires_at >= ?
-     ORDER BY pinned DESC, created_at DESC
+     ORDER BY pinned DESC, created_at DESC, id
      LIMIT 100`,
     [now],
     (err, rows) => {
@@ -310,7 +311,8 @@ const createPost = (req, res) => {
 
   db.getDb().run(
     `INSERT INTO community_posts (title, content, author, organization, category, pinned, expires_at, resource_id)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+     RETURNING id`,
     [
       String(title).trim(), String(content).trim(), req.organization, req.organization,
       category || 'alert', pinned ? 1 : 0,
@@ -321,12 +323,12 @@ const createPost = (req, res) => {
         : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
       resourceId || null
     ],
-    function (err) {
+    (err, result) => {
       if (err) {
         res.status(500).json({ error: err.message });
         return;
       }
-      db.getDb().get('SELECT * FROM community_posts WHERE id = ?', [this.lastID], (e, row) => {
+      db.getDb().get('SELECT * FROM community_posts WHERE id = ?', [result.rows[0].id], (e, row) => {
         if (e) {
           res.status(500).json({ error: e.message });
           return;

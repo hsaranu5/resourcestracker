@@ -15,7 +15,9 @@ const getAll = (req, res) => {
     params.push(zip_code);
   }
 
-  query += ' ORDER BY created_at DESC';
+  // id breaks ties the way SQLite's stable sort did (rows share created_at
+  // when seeded together); Postgres leaves tie order undefined.
+  query += ' ORDER BY created_at DESC, id';
 
   db.getDb().all(query, params, (err, rows) => {
     if (err) {
@@ -28,6 +30,10 @@ const getAll = (req, res) => {
 
 const getById = (req, res) => {
   const { id } = req.params;
+  if (!db.isRowId(id)) {
+    res.status(404).json({ error: 'Resource not found' });
+    return;
+  }
   db.getDb().get('SELECT * FROM resources WHERE id = ?', [id], (err, row) => {
     if (err) {
       res.status(500).json({ error: err.message });
@@ -64,18 +70,19 @@ const create = (req, res) => {
       name, organization, type, description, address, city, state,
       zip_code, latitude, longitude, phone, website, hours, source
     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    RETURNING id
   `;
 
   db.getDb().run(
     query,
     [name, organization, type, description, address, city, state,
      zip_code, latitude, longitude, phone, website, hours, source],
-    function(err) {
+    (err, result) => {
       if (err) {
         res.status(500).json({ error: err.message });
         return;
       }
-      res.status(201).json({ id: this.lastID, ...req.body });
+      res.status(201).json({ id: result.rows[0].id, ...req.body });
     }
   );
 };
@@ -103,20 +110,25 @@ const update = (req, res) => {
       name = ?, organization = ?, type = ?, description = ?,
       address = ?, city = ?, state = ?, zip_code = ?,
       latitude = ?, longitude = ?, phone = ?, website = ?, hours = ?,
-      updated_at = CURRENT_TIMESTAMP
+      updated_at = utc_now_text()
     WHERE id = ?
   `;
+
+  if (!db.isRowId(id)) {
+    res.status(404).json({ error: 'Resource not found' });
+    return;
+  }
 
   db.getDb().run(
     query,
     [name, organization, type, description, address, city, state,
      zip_code, latitude, longitude, phone, website, hours, id],
-    function(err) {
+    (err, result) => {
       if (err) {
         res.status(500).json({ error: err.message });
         return;
       }
-      if (this.changes === 0) {
+      if (result.rowCount === 0) {
         res.status(404).json({ error: 'Resource not found' });
         return;
       }
@@ -127,12 +139,16 @@ const update = (req, res) => {
 
 const deleteResource = (req, res) => {
   const { id } = req.params;
-  db.getDb().run('DELETE FROM resources WHERE id = ?', [id], function(err) {
+  if (!db.isRowId(id)) {
+    res.status(404).json({ error: 'Resource not found' });
+    return;
+  }
+  db.getDb().run('DELETE FROM resources WHERE id = ?', [id], (err, result) => {
     if (err) {
       res.status(500).json({ error: err.message });
       return;
     }
-    if (this.changes === 0) {
+    if (result.rowCount === 0) {
       res.status(404).json({ error: 'Resource not found' });
       return;
     }

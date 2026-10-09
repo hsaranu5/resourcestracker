@@ -61,7 +61,7 @@ const toAppResource = (row) => {
  * without breaking anyone.
  */
 const exportAll = (req, res) => {
-  db.getDb().all('SELECT * FROM resources ORDER BY name', [], (err, rows) => {
+  db.getDb().all('SELECT * FROM resources ORDER BY name, id', [], (err, rows) => {
     if (err) {
       res.status(500).json({ error: err.message });
       return;

@@ -6,11 +6,16 @@ const getAll = (req, res) => {
   const params = [];
 
   if (resource_id) {
+    // A non-integer id can't match anything (SQLite just returned no rows).
+    if (!db.isRowId(resource_id)) {
+      res.json([]);
+      return;
+    }
     query += ' WHERE resource_id = ?';
     params.push(resource_id);
   }
 
-  query += ' ORDER BY created_at DESC';
+  query += ' ORDER BY created_at DESC, id'; // id: SQLite's tie order
 
   db.getDb().all(query, params, (err, rows) => {
     if (err) {
@@ -23,6 +28,10 @@ const getAll = (req, res) => {
 
 const getById = (req, res) => {
   const { id } = req.params;
+  if (!db.isRowId(id)) {
+    res.status(404).json({ error: 'Post not found' });
+    return;
+  }
   db.getDb().get('SELECT * FROM community_posts WHERE id = ?', [id], (err, row) => {
     if (err) {
       res.status(500).json({ error: err.message });
@@ -42,25 +51,30 @@ const create = (req, res) => {
   const query = `
     INSERT INTO community_posts (title, content, author, resource_id)
     VALUES (?, ?, ?, ?)
+    RETURNING id
   `;
 
-  db.getDb().run(query, [title, content, author || 'Anonymous', resource_id || null], function(err) {
+  db.getDb().run(query, [title, content, author || 'Anonymous', resource_id || null], (err, result) => {
     if (err) {
       res.status(500).json({ error: err.message });
       return;
     }
-    res.status(201).json({ id: this.lastID, ...req.body });
+    res.status(201).json({ id: result.rows[0].id, ...req.body });
   });
 };
 
 const deletePost = (req, res) => {
   const { id } = req.params;
-  db.getDb().run('DELETE FROM community_posts WHERE id = ?', [id], function(err) {
+  if (!db.isRowId(id)) {
+    res.status(404).json({ error: 'Post not found' });
+    return;
+  }
+  db.getDb().run('DELETE FROM community_posts WHERE id = ?', [id], (err, result) => {
     if (err) {
       res.status(500).json({ error: err.message });
       return;
     }
-    if (this.changes === 0) {
+    if (result.rowCount === 0) {
       res.status(404).json({ error: 'Post not found' });
       return;
     }
