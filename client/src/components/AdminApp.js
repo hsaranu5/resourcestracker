@@ -16,7 +16,7 @@ import AddPostForm from './AddPostForm';
 const AdminApp = () => (
   <div className="admin-app">
     <header className="header">
-      <h1>KC Resources — Publishing</h1>
+      <h1>CheckpointKC — Publishing</h1>
       <div className="header-right">
         <a className="header-action" href="/">← Public site</a>
       </div>

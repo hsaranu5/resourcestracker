@@ -14,7 +14,10 @@ import Icon from '../icons';
  */
 const Header = ({ activeTab, onTabChange, theme, onToggleTheme, onStartOver }) => (
   <header className="header">
-    <h1>KC Resources</h1>
+    <div className="header-brand">
+      <h1>CheckpointKC</h1>
+      <span className="header-subtitle">KC Resources</span>
+    </div>
     <div className="header-right">
       <nav className="header-tabs" aria-label="Sections">
         <button

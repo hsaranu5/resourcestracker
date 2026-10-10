@@ -98,8 +98,9 @@ const TakeawayView = ({ resources, crisisLines, origin, onBack, ticked }) => {
 
       <div className="takeaway-page">
         <header className="takeaway-head">
-          <h1>KC Resources</h1>
+          <h1>CheckpointKC</h1>
           <p>
+            KC Resources ·{' '}
             {resources.length} {resources.length === 1 ? 'place' : 'places'} · {printedOn}
             {origin.kind === 'zip' && ` · near ${origin.zip}`}
             <span className="takeaway-pages">

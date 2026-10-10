@@ -191,6 +191,18 @@ body {
   letter-spacing: 0.2px;
 }
 
+.header-brand {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.header-subtitle {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 500;
+}
+
 .header-tabs {
   display: flex;
   gap: 6px;
@@ -1354,6 +1366,15 @@ body {
 
   .header h1 {
     font-size: 17px;
+  }
+
+  .header-brand {
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .header-subtitle {
+    font-size: 11px;
   }
 
   .header-tabs {
