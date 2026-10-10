@@ -1,0 +1,482 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <style>
+    :root {
+      --bg: #eef0f4;
+      --panel: #ffffff;
+      --card: #f4f5f8;
+      --card-hover: #e9ebf0;
+      --border: #dde0e6;
+      --text: #1c1e21;
+      --muted: #6b7280;
+      --accent: #3b6fd4;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { color: #2f5cb0; }
+    button { font-family: inherit; }
+    .ico { flex-shrink: 0; }
+    .rail-item:hover { background: #f4f5f8; }
+    .row:hover { background: var(--card); }
+    .scroll::-webkit-scrollbar { width: 8px; }
+    .scroll::-webkit-scrollbar-thumb { background: #d5d9e0; border-radius: 4px; }
+  </style>
+</helmet>
+
+<div style="width: 1440px; height: 900px; display: flex; background: var(--bg); overflow: hidden">
+
+  <!-- ============================ LEFT NAV RAIL ============================ -->
+  <nav style="width: 64px; flex-shrink: 0; background: var(--panel); border-right: 1px solid var(--border); display: flex; flex-direction: column; align-items: center; padding: 12px 0; gap: 4px">
+    <div style="width: 36px; height: 36px; border-radius: 10px; background: var(--accent); color: #fff; display: flex; align-items: center; justify-content: center; margin-bottom: 12px">
+      <svg class="ico" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+    </div>
+    <button class="rail-item" style="width: 52px; border: none; background: transparent; color: #6b7280; border-radius: 12px; padding: 9px 0 7px; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer">
+      <svg class="ico" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+      <span style="font-size: 10px; font-weight: 700">Find</span>
+    </button>
+    <button class="rail-item" style="width: 52px; border: none; background: transparent; color: #6b7280; border-radius: 12px; padding: 9px 0 7px; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer">
+      <svg class="ico" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 11 18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg>
+      <span style="font-size: 10px; font-weight: 700">News</span>
+    </button>
+    <button class="rail-item" style="width: 52px; border: none; background: transparent; color: #6b7280; border-radius: 12px; padding: 9px 0 7px; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer">
+      <svg class="ico" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+      <span style="font-size: 10px; font-weight: 700">Post</span>
+    </button>
+    <button class="rail-item" style="width: 52px; border: none; background: #eaf0fb; color: #3b6fd4; border-radius: 12px; padding: 9px 0 7px; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer">
+      <svg class="ico" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3h7v7H3z"/><path d="M14 3h7v7h-7z"/><path d="M14 14h7v7h-7z"/><path d="M3 14h7v7H3z"/></svg>
+      <span style="font-size: 10px; font-weight: 700">Admin</span>
+    </button>
+    <div style="flex-grow: 1"></div>
+    <button style="width: 36px; height: 36px; border-radius: 10px; border: 1px solid var(--border); background: var(--card); color: var(--text); display: flex; align-items: center; justify-content: center; cursor: pointer">
+      <svg class="ico" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+    </button>
+  </nav>
+
+  <!-- ============================ ADMIN SUB-NAV ============================ -->
+  <aside style="width: 216px; flex-shrink: 0; background: var(--panel); border-right: 1px solid var(--border); padding: 18px 12px; display: flex; flex-direction: column; gap: 3px">
+    <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); padding: 0 10px 10px">Admin</div>
+
+    <div style="display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px; background: #eaf0fb; color: #3b6fd4; font-size: 14px; font-weight: 700; cursor: pointer">
+      <svg class="ico" viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+      Resources
+      <span style="margin-left: auto; font-size: 12px; font-weight: 700">116</span>
+    </div>
+    <div class="rail-item" style="display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px; color: var(--text); font-size: 14px; font-weight: 600; cursor: pointer">
+      <svg class="ico" viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="#6b7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v4"/><path d="M16 2v4"/><path d="M3 6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M3 10h18"/></svg>
+      Events
+      <span style="margin-left: auto; color: var(--muted); font-size: 12px; font-weight: 700">20</span>
+    </div>
+    <div class="rail-item" style="display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px; color: var(--text); font-size: 14px; font-weight: 600; cursor: pointer">
+      <svg class="ico" viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="#6b7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 11 18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg>
+      Posts
+      <span style="margin-left: auto; color: var(--muted); font-size: 12px; font-weight: 700">3</span>
+    </div>
+    <div class="rail-item" style="display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px; color: var(--text); font-size: 14px; font-weight: 600; cursor: pointer">
+      <svg class="ico" viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="#6b7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      Verified orgs
+      <span style="margin-left: auto; color: var(--muted); font-size: 12px; font-weight: 700">7</span>
+    </div>
+
+    <div style="height: 1px; background: var(--border); margin: 14px 10px"></div>
+
+    <div class="rail-item" style="display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px; color: var(--text); font-size: 14px; font-weight: 600; cursor: pointer">
+      <svg class="ico" viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="#6b7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 14 5-5-5-5"/><path d="M4 20v-7a4 4 0 0 1 4-4h12"/></svg>
+      Import &amp; export
+    </div>
+
+    <div style="flex-grow: 1"></div>
+
+    <div style="background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 13px">
+      <div style="display: flex; align-items: center; gap: 7px; color: var(--muted); font-size: 11px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase">
+        <svg class="ico" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+        Last import
+      </div>
+      <div style="font-size: 13px; font-weight: 600; margin-top: 7px; line-height: 1.4">KCPL Street Sheet<br />Summer 2026</div>
+      <div style="color: var(--muted); font-size: 12px; margin-top: 5px">116 rows · 24 Jul</div>
+    </div>
+  </aside>
+
+  <!-- ============================ MAIN ============================ -->
+  <div style="flex-grow: 1; display: flex; flex-direction: column; min-width: 0">
+
+    <header style="background: var(--panel); border-bottom: 1px solid var(--border); padding: 14px 24px; display: flex; align-items: center; gap: 16px; flex-shrink: 0">
+      <div>
+        <h1 style="margin: 0; font-size: 20px; font-weight: 700; letter-spacing: 0.2px">Resources</h1>
+        <div style="color: var(--muted); font-size: 12px; margin-top: 2px">Everything on the map and in the list, in one place</div>
+      </div>
+      <div style="flex-grow: 1"></div>
+      <button style="display: inline-flex; align-items: center; gap: 7px; border: 1px solid var(--border); background: var(--panel); color: var(--text); border-radius: 999px; padding: 10px 16px; font-size: 13px; font-weight: 700; cursor: pointer">
+        <svg class="ico" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 14 5-5-5-5"/><path d="M4 20v-7a4 4 0 0 1 4-4h12"/></svg>
+        Export CSV
+      </button>
+      <button style="display: inline-flex; align-items: center; gap: 7px; background: var(--accent); color: #fff; border: none; border-radius: 999px; padding: 10px 18px; font-size: 13px; font-weight: 700; cursor: pointer">
+        <svg class="ico" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+        Add resource
+      </button>
+      <div style="display: flex; align-items: center; gap: 9px; border-left: 1px solid var(--border); padding-left: 16px">
+        <span style="width: 30px; height: 30px; border-radius: 999px; background: #5B6B8C; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700">GM</span>
+        <div style="line-height: 1.3">
+          <div style="font-size: 13px; font-weight: 700">Genova M.</div>
+          <div style="font-size: 11px; color: var(--muted)">Administrator</div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Filter bar -->
+    <div style="background: var(--panel); border-bottom: 1px solid var(--border); padding: 12px 24px; display: flex; align-items: center; gap: 12px; flex-shrink: 0">
+
+      <div style="display: flex; align-items: center; gap: 8px; background: var(--card); border: 1px solid var(--border); border-radius: 999px; padding: 0 14px; width: 320px">
+        <svg class="ico" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#6b7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        <input type="search" placeholder="Search name, organization or ZIP" value="{{ query }}" onChange="{{ onQuery }}" style="flex-grow: 1; background: transparent; border: none; outline: none; color: #1c1e21; font-size: 14px; padding: 9px 0; font-family: inherit; min-width: 0" />
+      </div>
+
+      <div style="display: flex; background: var(--card); border: 1px solid var(--border); border-radius: 999px; padding: 3px; gap: 2px">
+        <button onClick="{{ tabAll }}" style="border: none; background: {{bgTabAll}}; color: {{fgTabAll}}; box-shadow: {{shTabAll}}; padding: 7px 16px; border-radius: 999px; font-size: 13px; font-weight: 600; cursor: pointer">All</button>
+        <button onClick="{{ tabUnverified }}" style="border: none; background: {{bgTabUnverified}}; color: {{fgTabUnverified}}; box-shadow: {{shTabUnverified}}; padding: 7px 16px; border-radius: 999px; font-size: 13px; font-weight: 600; cursor: pointer">Unverified · 3</button>
+        <button onClick="{{ tabNoCoords }}" style="border: none; background: {{bgTabNoCoords}}; color: {{fgTabNoCoords}}; box-shadow: {{shTabNoCoords}}; padding: 7px 16px; border-radius: 999px; font-size: 13px; font-weight: 600; cursor: pointer">No coordinates · 2</button>
+      </div>
+
+      <div style="flex-grow: 1"></div>
+      <span style="color: var(--muted); font-size: 13px; font-weight: 600">Showing {{ count }} of 116</span>
+    </div>
+
+    <!-- Unverified banner: the review lane, using the field that already exists -->
+    <sc-if value="{{ showBanner }}" hint-placeholder-val="{{ false }}">
+      <div style="display: flex; align-items: center; gap: 11px; background: rgba(232, 132, 44, 0.11); border-bottom: 1px solid var(--border); padding: 12px 24px; flex-shrink: 0">
+        <svg class="ico" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#a85c17" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+        <span style="font-size: 13px; color: #8a4c12; font-weight: 600">These are live but marked unconfirmed — the public list shows them with a "Call first" warning. Confirm with the provider, then flip Verified on.</span>
+      </div>
+    </sc-if>
+
+    <!-- Table -->
+    <div class="scroll" style="flex-grow: 1; overflow-y: auto; min-height: 0">
+
+      <div style="display: grid; grid-template-columns: 44px 2.6fr 1.6fr 1fr 1.4fr 108px 96px; gap: 0; align-items: center; padding: 0 24px; height: 42px; background: var(--bg); border-bottom: 1px solid var(--border); position: sticky; top: 0; color: var(--muted); font-size: 11px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase">
+        <span></span>
+        <span>Name</span>
+        <span>Organization</span>
+        <span>Category</span>
+        <span>Hours</span>
+        <span>Verified</span>
+        <span></span>
+      </div>
+
+      <!-- Row 1 -->
+      <sc-if value="{{ r1 }}" hint-placeholder-val="{{ true }}">
+        <div class="row" style="display: grid; grid-template-columns: 44px 2.6fr 1.6fr 1fr 1.4fr 108px 96px; align-items: center; padding: 0 24px; min-height: 60px; border-bottom: 1px solid var(--border); background: var(--panel)">
+          <span style="width: 30px; height: 30px; border-radius: 8px; display: flex; align-items: center; justify-content: center; background: #2FA8B8; color: #fff">
+            <svg class="ico" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m4 4 2.5 2.5"/><path d="M13.5 6.5a4.95 4.95 0 0 0-7 7"/><path d="M15 5 5 15"/></svg>
+          </span>
+          <div style="padding-right: 14px">
+            <div style="font-size: 14px; font-weight: 700; line-height: 1.35">Cherith Brook Catholic Worker</div>
+            <div style="color: var(--muted); font-size: 12px; margin-top: 2px">3226 E 12th Street · 64127</div>
+          </div>
+          <span style="color: var(--muted); font-size: 13px; padding-right: 12px">Cherith Brook</span>
+          <span style="font-size: 12px; font-weight: 700; color: #2FA8B8">Hygiene</span>
+          <span style="color: var(--muted); font-size: 12px; padding-right: 12px; line-height: 1.4">Showers Tue &amp; Thu 7:00–10:30 AM</span>
+          <span style="display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; color: #177234">
+            <svg class="ico" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+            Verified
+          </span>
+          <div style="display: flex; gap: 6px; justify-content: flex-end">
+            <button style="width: 32px; height: 32px; border-radius: 9px; border: 1px solid var(--border); background: var(--panel); color: var(--muted); display: flex; align-items: center; justify-content: center; cursor: pointer">
+              <svg class="ico" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+            </button>
+            <button style="width: 32px; height: 32px; border-radius: 9px; border: 1px solid var(--border); background: var(--panel); color: var(--muted); display: flex; align-items: center; justify-content: center; cursor: pointer">
+              <svg class="ico" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg>
+            </button>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- Row 2 -->
+      <sc-if value="{{ r2 }}" hint-placeholder-val="{{ true }}">
+        <div class="row" style="display: grid; grid-template-columns: 44px 2.6fr 1.6fr 1fr 1.4fr 108px 96px; align-items: center; padding: 0 24px; min-height: 60px; border-bottom: 1px solid var(--border); background: var(--panel)">
+          <span style="width: 30px; height: 30px; border-radius: 8px; display: flex; align-items: center; justify-content: center; background: #E8842C; color: #fff">
+            <svg class="ico" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/></svg>
+          </span>
+          <div style="padding-right: 14px">
+            <div style="font-size: 14px; font-weight: 700; line-height: 1.35">Bishop Sullivan / One City Café</div>
+            <div style="color: var(--muted); font-size: 12px; margin-top: 2px">3936 Troost Avenue · 64110</div>
+          </div>
+          <span style="color: var(--muted); font-size: 13px; padding-right: 12px">Bishop Sullivan Center</span>
+          <span style="font-size: 12px; font-weight: 700; color: #E8842C">Food</span>
+          <span style="color: var(--muted); font-size: 12px; padding-right: 12px; line-height: 1.4">Mon–Thu 3:00–5:00 PM</span>
+          <span style="display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; color: #177234">
+            <svg class="ico" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+            Verified
+          </span>
+          <div style="display: flex; gap: 6px; justify-content: flex-end">
+            <button style="width: 32px; height: 32px; border-radius: 9px; border: 1px solid var(--border); background: var(--panel); color: var(--muted); display: flex; align-items: center; justify-content: center; cursor: pointer">
+              <svg class="ico" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+            </button>
+            <button style="width: 32px; height: 32px; border-radius: 9px; border: 1px solid var(--border); background: var(--panel); color: var(--muted); display: flex; align-items: center; justify-content: center; cursor: pointer">
+              <svg class="ico" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg>
+            </button>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- Row 3 — unverified, community suggestion -->
+      <sc-if value="{{ r3 }}" hint-placeholder-val="{{ true }}">
+        <div class="row" style="display: grid; grid-template-columns: 44px 2.6fr 1.6fr 1fr 1.4fr 108px 96px; align-items: center; padding: 0 24px; min-height: 60px; border-bottom: 1px solid var(--border); background: rgba(232, 132, 44, 0.05)">
+          <span style="width: 30px; height: 30px; border-radius: 8px; display: flex; align-items: center; justify-content: center; background: #2FA8B8; color: #fff">
+            <svg class="ico" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m4 4 2.5 2.5"/><path d="M13.5 6.5a4.95 4.95 0 0 0-7 7"/><path d="M15 5 5 15"/></svg>
+          </span>
+          <div style="padding-right: 14px">
+            <div style="font-size: 14px; font-weight: 700; line-height: 1.35">Westport Presbyterian Church – Showers</div>
+            <div style="color: var(--muted); font-size: 12px; margin-top: 2px">201 Westport Road · 64111 · suggested by a visitor, 2 days ago</div>
+          </div>
+          <span style="color: var(--muted); font-size: 13px; padding-right: 12px">Westport Presbyterian Church</span>
+          <span style="font-size: 12px; font-weight: 700; color: #2FA8B8">Hygiene</span>
+          <span style="color: var(--muted); font-size: 12px; padding-right: 12px; line-height: 1.4">Showers Wed 9:00 AM–12:00 PM</span>
+          <button onClick="{{ confirm3 }}" style="display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; color: {{fgV3}}; background: {{bgV3}}; border: 1px solid {{bdV3}}; border-radius: 999px; padding: 5px 11px; cursor: pointer">
+            <svg class="ico" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+            {{ labelV3 }}
+          </button>
+          <div style="display: flex; gap: 6px; justify-content: flex-end">
+            <button style="width: 32px; height: 32px; border-radius: 9px; border: 1px solid var(--border); background: var(--panel); color: var(--muted); display: flex; align-items: center; justify-content: center; cursor: pointer">
+              <svg class="ico" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+            </button>
+            <button style="width: 32px; height: 32px; border-radius: 9px; border: 1px solid var(--border); background: var(--panel); color: var(--muted); display: flex; align-items: center; justify-content: center; cursor: pointer">
+              <svg class="ico" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg>
+            </button>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- Row 4 -->
+      <sc-if value="{{ r4 }}" hint-placeholder-val="{{ true }}">
+        <div class="row" style="display: grid; grid-template-columns: 44px 2.6fr 1.6fr 1fr 1.4fr 108px 96px; align-items: center; padding: 0 24px; min-height: 60px; border-bottom: 1px solid var(--border); background: var(--panel)">
+          <span style="width: 30px; height: 30px; border-radius: 8px; display: flex; align-items: center; justify-content: center; background: #4A80E8; color: #fff">
+            <svg class="ico" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg>
+          </span>
+          <div style="padding-right: 14px">
+            <div style="font-size: 14px; font-weight: 700; line-height: 1.35">City Union Mission Men's Shelter</div>
+            <div style="color: var(--muted); font-size: 12px; margin-top: 2px">1108 E 10th Street · 64106</div>
+          </div>
+          <span style="color: var(--muted); font-size: 13px; padding-right: 12px">City Union Mission</span>
+          <span style="font-size: 12px; font-weight: 700; color: #4A80E8">Shelter</span>
+          <span style="color: var(--muted); font-size: 12px; padding-right: 12px; line-height: 1.4">Call for availability</span>
+          <span style="display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; color: #177234">
+            <svg class="ico" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+            Verified
+          </span>
+          <div style="display: flex; gap: 6px; justify-content: flex-end">
+            <button style="width: 32px; height: 32px; border-radius: 9px; border: 1px solid var(--border); background: var(--panel); color: var(--muted); display: flex; align-items: center; justify-content: center; cursor: pointer">
+              <svg class="ico" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+            </button>
+            <button style="width: 32px; height: 32px; border-radius: 9px; border: 1px solid var(--border); background: var(--panel); color: var(--muted); display: flex; align-items: center; justify-content: center; cursor: pointer">
+              <svg class="ico" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg>
+            </button>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- Row 5 — no coordinates -->
+      <sc-if value="{{ r5 }}" hint-placeholder-val="{{ true }}">
+        <div class="row" style="display: grid; grid-template-columns: 44px 2.6fr 1.6fr 1fr 1.4fr 108px 96px; align-items: center; padding: 0 24px; min-height: 60px; border-bottom: 1px solid var(--border); background: var(--panel)">
+          <span style="width: 30px; height: 30px; border-radius: 8px; display: flex; align-items: center; justify-content: center; background: #3BA55C; color: #fff">
+            <svg class="ico" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M12 10v6"/><path d="M9 13h6"/></svg>
+          </span>
+          <div style="padding-right: 14px">
+            <div style="font-size: 14px; font-weight: 700; line-height: 1.35">Swope Health – Showers &amp; Laundry</div>
+            <div style="display: inline-flex; align-items: center; gap: 5px; color: #a85c17; font-size: 12px; margin-top: 3px; font-weight: 600">
+              <svg class="ico" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+              No coordinates — won't appear on the map
+            </div>
+          </div>
+          <span style="color: var(--muted); font-size: 13px; padding-right: 12px">Swope Health</span>
+          <span style="font-size: 12px; font-weight: 700; color: #3BA55C">Health</span>
+          <span style="color: var(--muted); font-size: 12px; padding-right: 12px; line-height: 1.4">Mon 8:00 AM–12:00 PM; Fri 8:00 AM–2:00 PM</span>
+          <span style="display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; color: #177234">
+            <svg class="ico" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+            Verified
+          </span>
+          <div style="display: flex; gap: 6px; justify-content: flex-end">
+            <button style="width: 32px; height: 32px; border-radius: 9px; border: 1px solid var(--accent); background: var(--panel); color: var(--accent); display: flex; align-items: center; justify-content: center; cursor: pointer">
+              <svg class="ico" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+            </button>
+            <button style="width: 32px; height: 32px; border-radius: 9px; border: 1px solid var(--border); background: var(--panel); color: var(--muted); display: flex; align-items: center; justify-content: center; cursor: pointer">
+              <svg class="ico" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg>
+            </button>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- Row 6 -->
+      <sc-if value="{{ r6 }}" hint-placeholder-val="{{ true }}">
+        <div class="row" style="display: grid; grid-template-columns: 44px 2.6fr 1.6fr 1fr 1.4fr 108px 96px; align-items: center; padding: 0 24px; min-height: 60px; border-bottom: 1px solid var(--border); background: var(--panel)">
+          <span style="width: 30px; height: 30px; border-radius: 8px; display: flex; align-items: center; justify-content: center; background: #D64545; color: #fff">
+            <svg class="ico" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+          </span>
+          <div style="padding-right: 14px">
+            <div style="font-size: 14px; font-weight: 700; line-height: 1.35">Rose Brooks Center</div>
+            <div style="color: var(--muted); font-size: 12px; margin-top: 2px">Confidential location — hotline only</div>
+          </div>
+          <span style="color: var(--muted); font-size: 13px; padding-right: 12px">Rose Brooks Center</span>
+          <span style="font-size: 12px; font-weight: 700; color: #D64545">Crisis</span>
+          <span style="color: var(--muted); font-size: 12px; padding-right: 12px; line-height: 1.4">24/7 hotline</span>
+          <span style="display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; color: #177234">
+            <svg class="ico" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+            Verified
+          </span>
+          <div style="display: flex; gap: 6px; justify-content: flex-end">
+            <button style="width: 32px; height: 32px; border-radius: 9px; border: 1px solid var(--border); background: var(--panel); color: var(--muted); display: flex; align-items: center; justify-content: center; cursor: pointer">
+              <svg class="ico" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+            </button>
+            <button style="width: 32px; height: 32px; border-radius: 9px; border: 1px solid var(--border); background: var(--panel); color: var(--muted); display: flex; align-items: center; justify-content: center; cursor: pointer">
+              <svg class="ico" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg>
+            </button>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- Row 7 -->
+      <sc-if value="{{ r7 }}" hint-placeholder-val="{{ true }}">
+        <div class="row" style="display: grid; grid-template-columns: 44px 2.6fr 1.6fr 1fr 1.4fr 108px 96px; align-items: center; padding: 0 24px; min-height: 60px; border-bottom: 1px solid var(--border); background: var(--panel)">
+          <span style="width: 30px; height: 30px; border-radius: 8px; display: flex; align-items: center; justify-content: center; background: #5B6B8C; color: #fff">
+            <svg class="ico" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1 1 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/></svg>
+          </span>
+          <div style="padding-right: 14px">
+            <div style="font-size: 14px; font-weight: 700; line-height: 1.35">Veterans Community Project – Welcome Center</div>
+            <div style="color: var(--muted); font-size: 12px; margin-top: 2px">8900 Troost Avenue · 64131</div>
+          </div>
+          <span style="color: var(--muted); font-size: 13px; padding-right: 12px">Veterans Community Project</span>
+          <span style="font-size: 12px; font-weight: 700; color: #5B6B8C">Veterans</span>
+          <span style="color: var(--muted); font-size: 12px; padding-right: 12px; line-height: 1.4">Mon 10:00 AM–4:00 PM; Tue–Thu 9:00 AM–4:00 PM</span>
+          <span style="display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; color: #177234">
+            <svg class="ico" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+            Verified
+          </span>
+          <div style="display: flex; gap: 6px; justify-content: flex-end">
+            <button style="width: 32px; height: 32px; border-radius: 9px; border: 1px solid var(--border); background: var(--panel); color: var(--muted); display: flex; align-items: center; justify-content: center; cursor: pointer">
+              <svg class="ico" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+            </button>
+            <button style="width: 32px; height: 32px; border-radius: 9px; border: 1px solid var(--border); background: var(--panel); color: var(--muted); display: flex; align-items: center; justify-content: center; cursor: pointer">
+              <svg class="ico" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg>
+            </button>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- Row 8 — unverified -->
+      <sc-if value="{{ r8 }}" hint-placeholder-val="{{ true }}">
+        <div class="row" style="display: grid; grid-template-columns: 44px 2.6fr 1.6fr 1fr 1.4fr 108px 96px; align-items: center; padding: 0 24px; min-height: 60px; border-bottom: 1px solid var(--border); background: rgba(232, 132, 44, 0.05)">
+          <span style="width: 30px; height: 30px; border-radius: 8px; display: flex; align-items: center; justify-content: center; background: #E8842C; color: #fff">
+            <svg class="ico" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/></svg>
+          </span>
+          <div style="padding-right: 14px">
+            <div style="font-size: 14px; font-weight: 700; line-height: 1.35">Grace Episcopal – Saturday Breakfast</div>
+            <div style="color: var(--muted); font-size: 12px; margin-top: 2px">13th &amp; Broadway · 64105 · suggested by a visitor, 5 days ago</div>
+          </div>
+          <span style="color: var(--muted); font-size: 13px; padding-right: 12px">Grace Episcopal</span>
+          <span style="font-size: 12px; font-weight: 700; color: #E8842C">Food</span>
+          <span style="color: var(--muted); font-size: 12px; padding-right: 12px; line-height: 1.4">Sat 8:00–9:30 AM</span>
+          <button onClick="{{ confirm8 }}" style="display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; color: {{fgV8}}; background: {{bgV8}}; border: 1px solid {{bdV8}}; border-radius: 999px; padding: 5px 11px; cursor: pointer">
+            <svg class="ico" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+            {{ labelV8 }}
+          </button>
+          <div style="display: flex; gap: 6px; justify-content: flex-end">
+            <button style="width: 32px; height: 32px; border-radius: 9px; border: 1px solid var(--border); background: var(--panel); color: var(--muted); display: flex; align-items: center; justify-content: center; cursor: pointer">
+              <svg class="ico" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+            </button>
+            <button style="width: 32px; height: 32px; border-radius: 9px; border: 1px solid var(--border); background: var(--panel); color: var(--muted); display: flex; align-items: center; justify-content: center; cursor: pointer">
+              <svg class="ico" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg>
+            </button>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ empty }}" hint-placeholder-val="{{ false }}">
+        <div style="text-align: center; padding: 60px 20px; color: var(--muted)">
+          <p style="margin: 8px 0; font-size: 15px">Nothing matches that filter</p>
+          <p style="margin: 8px 0; font-size: 13px">Clear the search, or switch back to All.</p>
+        </div>
+      </sc-if>
+    </div>
+  </div>
+</div>
+</x-dc>
+
+<script data-dc-script data-props='{}'>
+const ROWS = [
+  { i: 1, verified: true,  coords: true,  text: 'cherith brook catholic worker hygiene showers 64127' },
+  { i: 2, verified: true,  coords: true,  text: 'bishop sullivan one city cafe food troost 64110' },
+  { i: 3, verified: false, coords: true,  text: 'westport presbyterian church showers hygiene 64111' },
+  { i: 4, verified: true,  coords: true,  text: 'city union mission mens shelter 64106' },
+  { i: 5, verified: true,  coords: false, text: 'swope health showers laundry 64130' },
+  { i: 6, verified: true,  coords: false, text: 'rose brooks center crisis hotline' },
+  { i: 7, verified: true,  coords: true,  text: 'veterans community project welcome center 64131' },
+  { i: 8, verified: false, coords: true,  text: 'grace episcopal saturday breakfast food 64105' }
+];
+
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { tab: 'all', query: '', confirmed: {} };
+  }
+
+  renderVals() {
+    const s = this.state;
+    const out = {};
+
+    [['All', 'all'], ['Unverified', 'unverified'], ['NoCoords', 'nocoords']].forEach((t) => {
+      const name = t[0], key = t[1];
+      const on = s.tab === key;
+      out['bgTab' + name] = on ? '#ffffff' : 'transparent';
+      out['fgTab' + name] = on ? '#1c1e21' : '#6b7280';
+      out['shTab' + name] = on ? '0 1px 3px rgba(0, 0, 0, 0.15)' : 'none';
+      out['tab' + name] = () => this.setState({ tab: key });
+    });
+
+    let n = 0;
+    ROWS.forEach((row) => {
+      const verified = s.confirmed[row.i] ? true : row.verified;
+      let on = true;
+      if (s.tab === 'unverified' && verified) on = false;
+      if (s.tab === 'nocoords' && row.coords) on = false;
+      const q = s.query.trim().toLowerCase();
+      if (q && row.text.indexOf(q) === -1) on = false;
+      if (on) n += 1;
+      out['r' + row.i] = on;
+    });
+
+    [3, 8].forEach((i) => {
+      const done = !!s.confirmed[i];
+      out['labelV' + i] = done ? 'Verified' : 'Confirm';
+      out['fgV' + i] = done ? '#177234' : '#a85c17';
+      out['bgV' + i] = done ? 'rgba(30, 142, 62, 0.12)' : '#ffffff';
+      out['bdV' + i] = done ? 'rgba(30, 142, 62, 0.35)' : '#e0b483';
+      out['confirm' + i] = () => {
+        const next = Object.assign({}, this.state.confirmed);
+        next[i] = !next[i];
+        this.setState({ confirmed: next });
+      };
+    });
+
+    out.count = n;
+    out.empty = n === 0;
+    out.query = s.query;
+    out.onQuery = (e) => this.setState({ query: e.target.value });
+    out.showBanner = s.tab === 'unverified';
+    return out;
+  }
+}
+</script>
+</body>
+</html>

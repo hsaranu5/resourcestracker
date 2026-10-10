@@ -1,0 +1,32 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "kc-api",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "server"
+      ],
+      "port": 5001
+    },
+    {
+      "name": "kc-resources",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "client"
+      ],
+      "port": 3000
+    },
+    {
+      "name": "kc-prod",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "prod"
+      ],
+      "port": 5055
+    }
+  ]
+}

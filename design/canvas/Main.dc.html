@@ -1,0 +1,723 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <style>
+    :root {
+      --bg: #eef0f4;
+      --panel: #ffffff;
+      --card: #f4f5f8;
+      --card-hover: #e9ebf0;
+      --border: #dde0e6;
+      --text: #1c1e21;
+      --muted: #6b7280;
+      --accent: #3b6fd4;
+      --open: #1e8e3e;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { color: #2f5cb0; }
+    button { font-family: inherit; }
+    .rail-item:hover { background: #f4f5f8; }
+    .chip:hover { filter: brightness(0.97); }
+    .rcard:hover { background: var(--card-hover); }
+    .scroll::-webkit-scrollbar { width: 8px; }
+    .scroll::-webkit-scrollbar-thumb { background: #d5d9e0; border-radius: 4px; }
+    .ico { flex-shrink: 0; }
+  </style>
+</helmet>
+
+<div style="width: 1440px; height: 900px; display: flex; background: var(--bg); overflow: hidden">
+
+  <!-- ============================ LEFT NAV RAIL ============================ -->
+  <nav style="width: 64px; flex-shrink: 0; background: var(--panel); border-right: 1px solid var(--border); display: flex; flex-direction: column; align-items: center; padding: 12px 0; gap: 4px">
+
+    <div style="width: 36px; height: 36px; border-radius: 10px; background: var(--accent); color: #fff; display: flex; align-items: center; justify-content: center; margin-bottom: 12px">
+      <svg class="ico" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+    </div>
+
+    <button class="rail-item" onClick="{{ navFind }}" style="width: 52px; border: none; background: {{bgFind}}; color: {{fgFind}}; border-radius: 12px; padding: 9px 0 7px; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer">
+      <svg class="ico" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+      <span style="font-size: 10px; font-weight: 700">Find</span>
+    </button>
+
+    <button class="rail-item" onClick="{{ navNews }}" style="width: 52px; border: none; background: {{bgNews}}; color: {{fgNews}}; border-radius: 12px; padding: 9px 0 7px; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer">
+      <svg class="ico" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 11 18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg>
+      <span style="font-size: 10px; font-weight: 700">News</span>
+    </button>
+
+    <button class="rail-item" onClick="{{ navPost }}" style="width: 52px; border: none; background: {{bgPost}}; color: {{fgPost}}; border-radius: 12px; padding: 9px 0 7px; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer">
+      <svg class="ico" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+      <span style="font-size: 10px; font-weight: 700">Post</span>
+    </button>
+
+    <button class="rail-item" onClick="{{ navAdmin }}" style="width: 52px; border: none; background: {{bgAdmin}}; color: {{fgAdmin}}; border-radius: 12px; padding: 9px 0 7px; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer">
+      <svg class="ico" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3h7v7H3z"/><path d="M14 3h7v7h-7z"/><path d="M14 14h7v7h-7z"/><path d="M3 14h7v7H3z"/></svg>
+      <span style="font-size: 10px; font-weight: 700">Admin</span>
+    </button>
+
+    <div style="flex-grow: 1"></div>
+
+    <button style="width: 36px; height: 36px; border-radius: 10px; border: 1px solid var(--border); background: var(--card); color: var(--text); display: flex; align-items: center; justify-content: center; cursor: pointer">
+      <svg class="ico" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+    </button>
+  </nav>
+
+  <!-- ============================ MAIN COLUMN ============================ -->
+  <div style="flex-grow: 1; display: flex; flex-direction: column; min-width: 0">
+
+    <header style="background: var(--panel); border-bottom: 1px solid var(--border); padding: 14px 24px; display: flex; align-items: center; gap: 16px; flex-shrink: 0">
+      <div>
+        <h1 style="margin: 0; font-size: 20px; font-weight: 700; letter-spacing: 0.2px">KC Resources</h1>
+        <div style="color: var(--muted); font-size: 12px; margin-top: 2px">Food, shelter, health and crisis help in Kansas City</div>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 7px; background: var(--card); border: 1px solid var(--border); border-radius: 999px; padding: 7px 14px; margin-left: 12px">
+        <svg class="ico" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="#6b7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+        <span style="font-size: 13px; font-weight: 600">Near 64108</span>
+        <span style="color: var(--accent); font-size: 13px; font-weight: 700; cursor: pointer">Change</span>
+      </div>
+
+      <div style="flex-grow: 1"></div>
+
+      <button style="display: inline-flex; align-items: center; gap: 7px; background: var(--accent); color: #fff; border: none; border-radius: 999px; padding: 10px 18px; font-size: 13px; font-weight: 700; cursor: pointer">
+        <svg class="ico" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+        Suggest a resource
+      </button>
+      <button style="border: 1px solid var(--border); background: var(--panel); color: var(--text); border-radius: 999px; padding: 10px 16px; font-size: 13px; font-weight: 700; cursor: pointer">Org sign in</button>
+    </header>
+
+    <div style="flex-grow: 1; display: flex; min-height: 0">
+
+      <!-- ---------------------------- SIDEBAR ---------------------------- -->
+      <aside style="width: 420px; flex-shrink: 0; background: var(--panel); border-right: 1px solid var(--border); display: flex; flex-direction: column; min-height: 0">
+
+        <div style="padding: 12px 14px 10px; border-bottom: 1px solid var(--border); display: flex; flex-direction: column; gap: 10px; flex-shrink: 0">
+
+          <div style="display: flex; align-items: center; gap: 8px; background: var(--card); border: 1px solid var(--border); border-radius: 999px; padding: 0 14px">
+            <svg class="ico" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#6b7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+            <input type="search" placeholder="Search name, service, or ZIP" value="{{ query }}" onChange="{{ onQuery }}" style="flex-grow: 1; background: transparent; border: none; outline: none; color: #1c1e21; font-size: 14px; padding: 11px 0; font-family: inherit" />
+          </div>
+
+          <div style="display: flex; flex-wrap: wrap; gap: 8px">
+            <button class="chip" onClick="{{ catAll }}" style="display: inline-flex; align-items: center; gap: 6px; border: 1px solid {{bdAll}}; background: {{bgAll}}; color: {{fgAll}}; padding: 8px 14px; border-radius: 999px; font-size: 13px; font-weight: 600; cursor: pointer">
+              <svg class="ico" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3h7v7H3z"/><path d="M14 3h7v7h-7z"/><path d="M14 14h7v7h-7z"/><path d="M3 14h7v7H3z"/></svg>
+              All
+            </button>
+            <button class="chip" onClick="{{ catFood }}" style="display: inline-flex; align-items: center; gap: 6px; border: 1px solid {{bdFood}}; background: {{bgFood}}; color: {{fgFood}}; padding: 8px 14px; border-radius: 999px; font-size: 13px; font-weight: 600; cursor: pointer">
+              <svg class="ico" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/></svg>
+              Food
+            </button>
+            <button class="chip" onClick="{{ catShelter }}" style="display: inline-flex; align-items: center; gap: 6px; border: 1px solid {{bdShelter}}; background: {{bgShelter}}; color: {{fgShelter}}; padding: 8px 14px; border-radius: 999px; font-size: 13px; font-weight: 600; cursor: pointer">
+              <svg class="ico" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg>
+              Shelter
+            </button>
+            <button class="chip" onClick="{{ catHealth }}" style="display: inline-flex; align-items: center; gap: 6px; border: 1px solid {{bdHealth}}; background: {{bgHealth}}; color: {{fgHealth}}; padding: 8px 14px; border-radius: 999px; font-size: 13px; font-weight: 600; cursor: pointer">
+              <svg class="ico" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 6V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><path d="M3 8a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M12 10v6"/><path d="M9 13h6"/></svg>
+              Health
+            </button>
+            <button class="chip" onClick="{{ catHygiene }}" style="display: inline-flex; align-items: center; gap: 6px; border: 1px solid {{bdHygiene}}; background: {{bgHygiene}}; color: {{fgHygiene}}; padding: 8px 14px; border-radius: 999px; font-size: 13px; font-weight: 600; cursor: pointer">
+              <svg class="ico" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m4 4 2.5 2.5"/><path d="M13.5 6.5a4.95 4.95 0 0 0-7 7"/><path d="M15 5 5 15"/><path d="M14 17v.01"/><path d="M10 16v.01"/><path d="M13 13v.01"/><path d="M16 10v.01"/></svg>
+              Hygiene
+            </button>
+            <button class="chip" onClick="{{ catCrisis }}" style="display: inline-flex; align-items: center; gap: 6px; border: 1px solid {{bdCrisis}}; background: {{bgCrisis}}; color: {{fgCrisis}}; padding: 8px 14px; border-radius: 999px; font-size: 13px; font-weight: 600; cursor: pointer">
+              <svg class="ico" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+              Crisis
+            </button>
+            <button class="chip" onClick="{{ catYouth }}" style="display: inline-flex; align-items: center; gap: 6px; border: 1px solid {{bdYouth}}; background: {{bgYouth}}; color: {{fgYouth}}; padding: 8px 14px; border-radius: 999px; font-size: 13px; font-weight: 600; cursor: pointer">
+              <svg class="ico" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+              Youth
+            </button>
+            <button class="chip" onClick="{{ catVeterans }}" style="display: inline-flex; align-items: center; gap: 6px; border: 1px solid {{bdVeterans}}; background: {{bgVeterans}}; color: {{fgVeterans}}; padding: 8px 14px; border-radius: 999px; font-size: 13px; font-weight: 600; cursor: pointer">
+              <svg class="ico" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1 1 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/></svg>
+              Veterans
+            </button>
+            <button class="chip" onClick="{{ catSupport }}" style="display: inline-flex; align-items: center; gap: 6px; border: 1px solid {{bdSupport}}; background: {{bgSupport}}; color: {{fgSupport}}; padding: 8px 14px; border-radius: 999px; font-size: 13px; font-weight: 600; cursor: pointer">
+              <svg class="ico" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+              Support
+            </button>
+          </div>
+
+          <div style="display: flex; align-items: center; gap: 10px">
+            <span style="color: var(--muted); font-size: 13px">Within</span>
+            <div style="display: flex; background: var(--card); border-radius: 999px; padding: 3px; gap: 2px">
+              <button onClick="{{ rad1 }}" style="border: none; background: {{bgR1}}; color: {{fgR1}}; box-shadow: {{shR1}}; padding: 6px 12px; border-radius: 999px; font-size: 13px; font-weight: 600; cursor: pointer">1 mi</button>
+              <button onClick="{{ rad3 }}" style="border: none; background: {{bgR3}}; color: {{fgR3}}; box-shadow: {{shR3}}; padding: 6px 12px; border-radius: 999px; font-size: 13px; font-weight: 600; cursor: pointer">3 mi</button>
+              <button onClick="{{ rad5 }}" style="border: none; background: {{bgR5}}; color: {{fgR5}}; box-shadow: {{shR5}}; padding: 6px 12px; border-radius: 999px; font-size: 13px; font-weight: 600; cursor: pointer">5 mi</button>
+              <button onClick="{{ rad10 }}" style="border: none; background: {{bgR10}}; color: {{fgR10}}; box-shadow: {{shR10}}; padding: 6px 12px; border-radius: 999px; font-size: 13px; font-weight: 600; cursor: pointer">10 mi</button>
+              <button onClick="{{ rad25 }}" style="border: none; background: {{bgR25}}; color: {{fgR25}}; box-shadow: {{shR25}}; padding: 6px 12px; border-radius: 999px; font-size: 13px; font-weight: 600; cursor: pointer">25 mi</button>
+            </div>
+            <span style="margin-left: auto; color: var(--muted); font-size: 13px; font-weight: 600">{{ count }} found</span>
+          </div>
+        </div>
+
+        <div class="scroll" style="flex-grow: 1; overflow-y: auto; padding: 12px 14px 20px; min-height: 0">
+
+          <!-- Card 1 — hygiene -->
+          <sc-if value="{{ c1 }}" hint-placeholder-val="{{ true }}">
+            <div class="rcard" onClick="{{ p1 }}" style="background: var(--card); border: 1px solid {{b1}}; border-radius: 12px; padding: 14px; margin-bottom: 10px; cursor: pointer">
+              <div style="display: flex; align-items: flex-start; gap: 10px">
+                <span style="width: 34px; height: 34px; border-radius: 9px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; background: #2FA8B8; color: #fff">
+                  <svg class="ico" viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m4 4 2.5 2.5"/><path d="M13.5 6.5a4.95 4.95 0 0 0-7 7"/><path d="M15 5 5 15"/><path d="M14 17v.01"/><path d="M10 16v.01"/><path d="M13 13v.01"/><path d="M16 10v.01"/></svg>
+                </span>
+                <div style="flex-grow: 1; min-width: 0">
+                  <h3 style="margin: 0; font-size: 16px; font-weight: 700; line-height: 1.3">Cherith Brook Catholic Worker</h3>
+                  <div style="color: var(--muted); font-size: 13px; margin-top: 2px">Cherith Brook</div>
+                </div>
+                <span style="color: var(--muted); font-size: 13px; font-weight: 600; flex-shrink: 0">0.4 mi</span>
+              </div>
+              <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 8px 0 2px">
+                <span style="font-size: 12px; font-weight: 700; border-radius: 999px; padding: 3px 10px; background: rgba(30, 142, 62, 0.15); color: #177234">Open now</span>
+              </div>
+              <div style="display: flex; align-items: center; gap: 6px; color: var(--muted); font-size: 13px; margin-top: 6px">
+                <svg class="ico" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+                3226 E 12th Street · 64127
+              </div>
+              <div style="display: flex; align-items: center; gap: 6px; color: var(--muted); font-size: 12px; margin-top: 4px">
+                <svg class="ico" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                Showers Tue &amp; Thu 7:00am–10:30am
+              </div>
+              <div style="display: flex; gap: 8px; margin-top: 10px">
+                <a href="#" style="flex-grow: 1; display: inline-flex; align-items: center; justify-content: center; gap: 6px; background: var(--accent); color: #fff; border-radius: 999px; padding: 9px 14px; font-size: 13px; font-weight: 700">
+                  <svg class="ico" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 14 5-5-5-5"/><path d="M4 20v-7a4 4 0 0 1 4-4h12"/></svg>
+                  Directions
+                </a>
+                <span style="display: inline-flex; align-items: center; justify-content: center; width: 38px; border: 1px solid var(--border); color: var(--accent); border-radius: 999px">
+                  <svg class="ico" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+                </span>
+              </div>
+            </div>
+          </sc-if>
+
+          <!-- Card 2 — food -->
+          <sc-if value="{{ c2 }}" hint-placeholder-val="{{ true }}">
+            <div class="rcard" onClick="{{ p2 }}" style="background: var(--card); border: 1px solid {{b2}}; border-radius: 12px; padding: 14px; margin-bottom: 10px; cursor: pointer">
+              <div style="display: flex; align-items: flex-start; gap: 10px">
+                <span style="width: 34px; height: 34px; border-radius: 9px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; background: #E8842C; color: #fff">
+                  <svg class="ico" viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/></svg>
+                </span>
+                <div style="flex-grow: 1; min-width: 0">
+                  <h3 style="margin: 0; font-size: 16px; font-weight: 700; line-height: 1.3">Bishop Sullivan / One City Café</h3>
+                  <div style="color: var(--muted); font-size: 13px; margin-top: 2px">Bishop Sullivan Center</div>
+                </div>
+                <span style="color: var(--muted); font-size: 13px; font-weight: 600; flex-shrink: 0">1.2 mi</span>
+              </div>
+              <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 8px 0 2px">
+                <span style="font-size: 12px; font-weight: 700; border-radius: 999px; padding: 3px 10px; background: rgba(232, 132, 44, 0.18); color: #a85c17">Closing soon</span>
+              </div>
+              <div style="display: flex; align-items: center; gap: 6px; color: var(--muted); font-size: 13px; margin-top: 6px">
+                <svg class="ico" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+                3936 Troost Avenue · 64110
+              </div>
+              <div style="display: flex; align-items: center; gap: 6px; color: var(--muted); font-size: 12px; margin-top: 4px">
+                <svg class="ico" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                Mon–Thu 3:00pm–5:00pm; Fri 11:00am–2:00pm
+              </div>
+              <div style="display: flex; gap: 8px; margin-top: 10px">
+                <a href="#" style="flex-grow: 1; display: inline-flex; align-items: center; justify-content: center; gap: 6px; background: var(--accent); color: #fff; border-radius: 999px; padding: 9px 14px; font-size: 13px; font-weight: 700">
+                  <svg class="ico" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 14 5-5-5-5"/><path d="M4 20v-7a4 4 0 0 1 4-4h12"/></svg>
+                  Directions
+                </a>
+                <span style="display: inline-flex; align-items: center; justify-content: center; width: 38px; border: 1px solid var(--border); color: var(--accent); border-radius: 999px">
+                  <svg class="ico" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+                </span>
+              </div>
+            </div>
+          </sc-if>
+
+          <!-- Card 3 — health -->
+          <sc-if value="{{ c3 }}" hint-placeholder-val="{{ true }}">
+            <div class="rcard" onClick="{{ p3 }}" style="background: var(--card); border: 1px solid {{b3}}; border-radius: 12px; padding: 14px; margin-bottom: 10px; cursor: pointer">
+              <div style="display: flex; align-items: flex-start; gap: 10px">
+                <span style="width: 34px; height: 34px; border-radius: 9px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; background: #3BA55C; color: #fff">
+                  <svg class="ico" viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 6V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><path d="M3 8a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M12 10v6"/><path d="M9 13h6"/></svg>
+                </span>
+                <div style="flex-grow: 1; min-width: 0">
+                  <h3 style="margin: 0; font-size: 16px; font-weight: 700; line-height: 1.3">Care Beyond the Boulevard @ Cherith Brook</h3>
+                  <div style="color: var(--muted); font-size: 13px; margin-top: 2px">Care Beyond the Boulevard</div>
+                </div>
+                <span style="color: var(--muted); font-size: 13px; font-weight: 600; flex-shrink: 0">1.6 mi</span>
+              </div>
+              <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 8px 0 2px">
+                <span style="font-size: 12px; font-weight: 700; border-radius: 999px; padding: 3px 10px; background: rgba(107, 114, 128, 0.15); color: #6b7280">Check hours</span>
+              </div>
+              <div style="display: flex; align-items: center; gap: 6px; color: var(--muted); font-size: 13px; margin-top: 6px">
+                <svg class="ico" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+                3226 E 12th Street · 64127
+              </div>
+              <div style="display: flex; align-items: center; gap: 6px; color: var(--muted); font-size: 12px; margin-top: 4px">
+                <svg class="ico" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                2nd & 4th Tue 8:30am–10:30am; Thu 5:00pm–7:00pm
+              </div>
+              <div style="display: flex; gap: 8px; margin-top: 10px">
+                <a href="#" style="flex-grow: 1; display: inline-flex; align-items: center; justify-content: center; gap: 6px; background: var(--accent); color: #fff; border-radius: 999px; padding: 9px 14px; font-size: 13px; font-weight: 700">
+                  <svg class="ico" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 14 5-5-5-5"/><path d="M4 20v-7a4 4 0 0 1 4-4h12"/></svg>
+                  Directions
+                </a>
+                <span style="display: inline-flex; align-items: center; justify-content: center; width: 38px; border: 1px solid var(--border); color: var(--accent); border-radius: 999px">
+                  <svg class="ico" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+                </span>
+              </div>
+            </div>
+          </sc-if>
+
+          <!-- Card 4 — shelter -->
+          <sc-if value="{{ c4 }}" hint-placeholder-val="{{ true }}">
+            <div class="rcard" onClick="{{ p4 }}" style="background: var(--card); border: 1px solid {{b4}}; border-radius: 12px; padding: 14px; margin-bottom: 10px; cursor: pointer">
+              <div style="display: flex; align-items: flex-start; gap: 10px">
+                <span style="width: 34px; height: 34px; border-radius: 9px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; background: #4A80E8; color: #fff">
+                  <svg class="ico" viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg>
+                </span>
+                <div style="flex-grow: 1; min-width: 0">
+                  <h3 style="margin: 0; font-size: 16px; font-weight: 700; line-height: 1.3">City Union Mission Men's Shelter</h3>
+                  <div style="color: var(--muted); font-size: 13px; margin-top: 2px">City Union Mission</div>
+                </div>
+                <span style="color: var(--muted); font-size: 13px; font-weight: 600; flex-shrink: 0">2.1 mi</span>
+              </div>
+              <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 8px 0 2px">
+                <span style="font-size: 12px; font-weight: 700; border-radius: 999px; padding: 3px 10px; background: rgba(107, 114, 128, 0.15); color: #6b7280">Check hours</span>
+              </div>
+              <div style="display: flex; align-items: center; gap: 6px; color: var(--muted); font-size: 13px; margin-top: 6px">
+                <svg class="ico" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+                1108 E 10th Street · 64106
+              </div>
+              <div style="display: flex; align-items: center; gap: 6px; color: var(--muted); font-size: 12px; margin-top: 4px">
+                <svg class="ico" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                Call for availability
+              </div>
+              <div style="display: flex; gap: 8px; margin-top: 10px">
+                <a href="#" style="flex-grow: 1; display: inline-flex; align-items: center; justify-content: center; gap: 6px; background: var(--accent); color: #fff; border-radius: 999px; padding: 9px 14px; font-size: 13px; font-weight: 700">
+                  <svg class="ico" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 14 5-5-5-5"/><path d="M4 20v-7a4 4 0 0 1 4-4h12"/></svg>
+                  Directions
+                </a>
+                <span style="display: inline-flex; align-items: center; justify-content: center; width: 38px; border: 1px solid var(--border); color: var(--accent); border-radius: 999px">
+                  <svg class="ico" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+                </span>
+              </div>
+            </div>
+          </sc-if>
+
+          <!-- Card 5 — crisis -->
+          <sc-if value="{{ c5 }}" hint-placeholder-val="{{ true }}">
+            <div class="rcard" onClick="{{ p5 }}" style="background: var(--card); border: 1px solid {{b5}}; border-radius: 12px; padding: 14px; margin-bottom: 10px; cursor: pointer">
+              <div style="display: flex; align-items: flex-start; gap: 10px">
+                <span style="width: 34px; height: 34px; border-radius: 9px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; background: #D64545; color: #fff">
+                  <svg class="ico" viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                </span>
+                <div style="flex-grow: 1; min-width: 0">
+                  <h3 style="margin: 0; font-size: 16px; font-weight: 700; line-height: 1.3">Rose Brooks Center</h3>
+                  <div style="color: var(--muted); font-size: 13px; margin-top: 2px">Rose Brooks Center</div>
+                </div>
+                <span style="color: var(--muted); font-size: 13px; font-weight: 600; flex-shrink: 0">3.4 mi</span>
+              </div>
+              <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 8px 0 2px">
+                <span style="font-size: 12px; font-weight: 700; border-radius: 999px; padding: 3px 10px; background: rgba(30, 142, 62, 0.15); color: #177234">Open 24/7</span>
+              </div>
+              <div style="display: flex; align-items: center; gap: 6px; color: var(--muted); font-size: 13px; margin-top: 6px">
+                <svg class="ico" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+                Confidential location — call the hotline
+              </div>
+              <div style="display: flex; align-items: center; gap: 6px; color: var(--muted); font-size: 12px; margin-top: 4px">
+                <svg class="ico" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                24/7 hotline
+              </div>
+              <div style="display: flex; gap: 8px; margin-top: 10px">
+                <a href="#" style="flex-grow: 1; display: inline-flex; align-items: center; justify-content: center; gap: 6px; background: #1e8e3e; color: #fff; border-radius: 999px; padding: 9px 14px; font-size: 13px; font-weight: 700">
+                  <svg class="ico" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                  Call now
+                </a>
+                <span style="display: inline-flex; align-items: center; justify-content: center; width: 38px; border: 1px solid var(--border); color: var(--accent); border-radius: 999px">
+                  <svg class="ico" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+                </span>
+              </div>
+            </div>
+          </sc-if>
+
+          <!-- Card 6 — hygiene, awaiting confirmation (sample state) -->
+          <sc-if value="{{ c6 }}" hint-placeholder-val="{{ true }}">
+            <div class="rcard" onClick="{{ p6 }}" style="background: var(--card); border: 1px solid {{b6}}; border-radius: 12px; padding: 14px; margin-bottom: 10px; cursor: pointer">
+              <div style="display: flex; align-items: flex-start; gap: 10px">
+                <span style="width: 34px; height: 34px; border-radius: 9px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; background: #2FA8B8; color: #fff">
+                  <svg class="ico" viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m4 4 2.5 2.5"/><path d="M13.5 6.5a4.95 4.95 0 0 0-7 7"/><path d="M15 5 5 15"/><path d="M14 17v.01"/><path d="M10 16v.01"/><path d="M13 13v.01"/><path d="M16 10v.01"/></svg>
+                </span>
+                <div style="flex-grow: 1; min-width: 0">
+                  <h3 style="margin: 0; font-size: 16px; font-weight: 700; line-height: 1.3">Westport Presbyterian Church – Showers</h3>
+                  <div style="color: var(--muted); font-size: 13px; margin-top: 2px">Westport Presbyterian Church</div>
+                </div>
+                <span style="color: var(--muted); font-size: 13px; font-weight: 600; flex-shrink: 0">2.4 mi</span>
+              </div>
+              <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 8px 0 2px">
+                <span style="font-size: 12px; font-weight: 700; border-radius: 999px; padding: 3px 10px; background: rgba(107, 114, 128, 0.15); color: #6b7280">Closed now</span>
+                <span style="display: inline-flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 700; border-radius: 999px; padding: 3px 10px; background: rgba(214, 69, 69, 0.16); color: #b03a3a">
+                  <svg class="ico" viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+                  Call first
+                </span>
+              </div>
+              <div style="display: flex; align-items: center; gap: 6px; color: var(--muted); font-size: 13px; margin-top: 6px">
+                <svg class="ico" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+                201 Westport Road · 64111
+              </div>
+              <div style="display: flex; align-items: center; gap: 6px; color: var(--muted); font-size: 12px; margin-top: 4px">
+                <svg class="ico" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                Showers Wed 9:00am–12:00pm
+              </div>
+              <div style="display: flex; gap: 8px; margin-top: 10px">
+                <a href="#" style="flex-grow: 1; display: inline-flex; align-items: center; justify-content: center; gap: 6px; background: var(--accent); color: #fff; border-radius: 999px; padding: 9px 14px; font-size: 13px; font-weight: 700">
+                  <svg class="ico" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 14 5-5-5-5"/><path d="M4 20v-7a4 4 0 0 1 4-4h12"/></svg>
+                  Directions
+                </a>
+                <span style="display: inline-flex; align-items: center; justify-content: center; width: 38px; border: 1px solid var(--border); color: var(--accent); border-radius: 999px">
+                  <svg class="ico" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+                </span>
+              </div>
+            </div>
+          </sc-if>
+
+          <!-- Card 7 — support -->
+          <sc-if value="{{ c7 }}" hint-placeholder-val="{{ true }}">
+            <div class="rcard" onClick="{{ p7 }}" style="background: var(--card); border: 1px solid {{b7}}; border-radius: 12px; padding: 14px; margin-bottom: 10px; cursor: pointer">
+              <div style="display: flex; align-items: flex-start; gap: 10px">
+                <span style="width: 34px; height: 34px; border-radius: 9px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; background: #7B8794; color: #fff">
+                  <svg class="ico" viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+                </span>
+                <div style="flex-grow: 1; min-width: 0">
+                  <h3 style="margin: 0; font-size: 16px; font-weight: 700; line-height: 1.3">The Beehive</h3>
+                  <div style="color: var(--muted); font-size: 13px; margin-top: 2px">The Beehive</div>
+                </div>
+                <span style="color: var(--muted); font-size: 13px; font-weight: 600; flex-shrink: 0">2.8 mi</span>
+              </div>
+              <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 8px 0 2px">
+                <span style="font-size: 12px; font-weight: 700; border-radius: 999px; padding: 3px 10px; background: rgba(107, 114, 128, 0.15); color: #6b7280">Closed now</span>
+              </div>
+              <div style="display: flex; align-items: center; gap: 6px; color: var(--muted); font-size: 13px; margin-top: 6px">
+                <svg class="ico" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+                3200 Wayne Avenue · 64109
+              </div>
+              <div style="display: flex; align-items: center; gap: 6px; color: var(--muted); font-size: 12px; margin-top: 4px">
+                <svg class="ico" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                Housing assistance Tue 11:00am–3:00pm
+              </div>
+              <div style="display: flex; gap: 8px; margin-top: 10px">
+                <a href="#" style="flex-grow: 1; display: inline-flex; align-items: center; justify-content: center; gap: 6px; background: var(--accent); color: #fff; border-radius: 999px; padding: 9px 14px; font-size: 13px; font-weight: 700">
+                  <svg class="ico" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 14 5-5-5-5"/><path d="M4 20v-7a4 4 0 0 1 4-4h12"/></svg>
+                  Directions
+                </a>
+                <span style="display: inline-flex; align-items: center; justify-content: center; width: 38px; border: 1px solid var(--border); color: var(--accent); border-radius: 999px">
+                  <svg class="ico" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+                </span>
+              </div>
+            </div>
+          </sc-if>
+
+          <!-- Card 8 — veterans -->
+          <sc-if value="{{ c8 }}" hint-placeholder-val="{{ true }}">
+            <div class="rcard" onClick="{{ p8 }}" style="background: var(--card); border: 1px solid {{b8}}; border-radius: 12px; padding: 14px; margin-bottom: 10px; cursor: pointer">
+              <div style="display: flex; align-items: flex-start; gap: 10px">
+                <span style="width: 34px; height: 34px; border-radius: 9px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; background: #5B6B8C; color: #fff">
+                  <svg class="ico" viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1 1 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/></svg>
+                </span>
+                <div style="flex-grow: 1; min-width: 0">
+                  <h3 style="margin: 0; font-size: 16px; font-weight: 700; line-height: 1.3">Veterans Community Project – Welcome Center</h3>
+                  <div style="color: var(--muted); font-size: 13px; margin-top: 2px">Veterans Community Project</div>
+                </div>
+                <span style="color: var(--muted); font-size: 13px; font-weight: 600; flex-shrink: 0">4.0 mi</span>
+              </div>
+              <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 8px 0 2px">
+                <span style="font-size: 12px; font-weight: 700; border-radius: 999px; padding: 3px 10px; background: rgba(30, 142, 62, 0.15); color: #177234">Open now</span>
+              </div>
+              <div style="display: flex; align-items: center; gap: 6px; color: var(--muted); font-size: 13px; margin-top: 6px">
+                <svg class="ico" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+                8900 Troost Avenue · 64131
+              </div>
+              <div style="display: flex; align-items: center; gap: 6px; color: var(--muted); font-size: 12px; margin-top: 4px">
+                <svg class="ico" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                Mon 10:00am–4:00pm; Tue–Thu 9:00am–4:00pm
+              </div>
+              <div style="display: flex; gap: 8px; margin-top: 10px">
+                <a href="#" style="flex-grow: 1; display: inline-flex; align-items: center; justify-content: center; gap: 6px; background: var(--accent); color: #fff; border-radius: 999px; padding: 9px 14px; font-size: 13px; font-weight: 700">
+                  <svg class="ico" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 14 5-5-5-5"/><path d="M4 20v-7a4 4 0 0 1 4-4h12"/></svg>
+                  Directions
+                </a>
+                <span style="display: inline-flex; align-items: center; justify-content: center; width: 38px; border: 1px solid var(--border); color: var(--accent); border-radius: 999px">
+                  <svg class="ico" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+                </span>
+              </div>
+            </div>
+          </sc-if>
+
+          <!-- Card 9 — youth -->
+          <sc-if value="{{ c9 }}" hint-placeholder-val="{{ true }}">
+            <div class="rcard" onClick="{{ p9 }}" style="background: var(--card); border: 1px solid {{b9}}; border-radius: 12px; padding: 14px; margin-bottom: 10px; cursor: pointer">
+              <div style="display: flex; align-items: flex-start; gap: 10px">
+                <span style="width: 34px; height: 34px; border-radius: 9px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; background: #8E5FBF; color: #fff">
+                  <svg class="ico" viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                </span>
+                <div style="flex-grow: 1; min-width: 0">
+                  <h3 style="margin: 0; font-size: 16px; font-weight: 700; line-height: 1.3">The HALO Foundation</h3>
+                  <div style="color: var(--muted); font-size: 13px; margin-top: 2px">The HALO Foundation</div>
+                </div>
+                <span style="color: var(--muted); font-size: 13px; font-weight: 600; flex-shrink: 0">3.1 mi</span>
+              </div>
+              <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 8px 0 2px">
+                <span style="font-size: 12px; font-weight: 700; border-radius: 999px; padding: 3px 10px; background: rgba(107, 114, 128, 0.15); color: #6b7280">Check hours</span>
+              </div>
+              <div style="display: flex; align-items: center; gap: 6px; color: var(--muted); font-size: 13px; margin-top: 6px">
+                <svg class="ico" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+                1600 Genessee Street · 64102
+              </div>
+              <div style="display: flex; align-items: center; gap: 6px; color: var(--muted); font-size: 12px; margin-top: 4px">
+                <svg class="ico" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                Call for hours
+              </div>
+              <div style="display: flex; gap: 8px; margin-top: 10px">
+                <a href="#" style="flex-grow: 1; display: inline-flex; align-items: center; justify-content: center; gap: 6px; background: var(--accent); color: #fff; border-radius: 999px; padding: 9px 14px; font-size: 13px; font-weight: 700">
+                  <svg class="ico" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 14 5-5-5-5"/><path d="M4 20v-7a4 4 0 0 1 4-4h12"/></svg>
+                  Directions
+                </a>
+                <span style="display: inline-flex; align-items: center; justify-content: center; width: 38px; border: 1px solid var(--border); color: var(--accent); border-radius: 999px">
+                  <svg class="ico" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+                </span>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ empty }}" hint-placeholder-val="{{ false }}">
+            <div style="text-align: center; padding: 40px 20px; color: var(--muted)">
+              <p style="margin: 10px 0">No resources match</p>
+              <p style="margin: 10px 0; font-size: 12px">Try a wider radius or another category.</p>
+            </div>
+          </sc-if>
+        </div>
+
+        <div style="border-top: 1px solid var(--border); padding: 12px 14px; display: flex; align-items: flex-start; gap: 10px; flex-shrink: 0; background: var(--panel)">
+          <svg class="ico" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="#6b7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-top: 1px"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+          <span style="font-size: 12px; color: var(--muted); line-height: 1.45">Know a place that isn't listed? <a href="#" style="font-weight: 700">Suggest a resource</a> — we confirm it before it goes live.</span>
+        </div>
+      </aside>
+
+      <!-- ---------------------------- MAP ---------------------------- -->
+      <div style="flex-grow: 1; position: relative; background: #e8ebf0; min-width: 0">
+
+        <svg viewBox="0 0 956 782" preserveAspectRatio="xMidYMid slice" style="position: absolute; inset: 0; width: 100%; height: 100%; display: block">
+          <rect x="0" y="0" width="956" height="782" fill="#e8ebf0"/>
+          <g stroke="#dcdfe6" stroke-width="1">
+            <path d="M0 60H956M0 140H956M0 220H956M0 300H956M0 380H956M0 460H956M0 540H956M0 620H956M0 700H956"/>
+            <path d="M70 0V782M150 0V782M230 0V782M310 0V782M390 0V782M470 0V782M550 0V782M630 0V782M710 0V782M790 0V782M870 0V782"/>
+          </g>
+          <g stroke="#d2d6de" stroke-width="6" stroke-linecap="round">
+            <path d="M0 300H956"/>
+            <path d="M470 0V782"/>
+            <path d="M-20 700 L360 420 L640 470 L976 250"/>
+          </g>
+          <path d="M690 0 C 660 160, 730 300, 700 460 C 675 600, 720 700, 700 782" stroke="#cfdce8" stroke-width="26" fill="none" stroke-linecap="round"/>
+          <g fill="#c2c8d2" font-family="-apple-system, sans-serif" font-size="11" font-weight="600">
+            <text x="18" y="292">TRUMAN RD</text>
+            <text x="484" y="120">TROOST AVE</text>
+          </g>
+        </svg>
+
+        <div style="position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 430px; height: 430px; border-radius: 50%; border: 1.5px dashed rgba(59, 111, 212, 0.45); background: rgba(59, 111, 212, 0.07)"></div>
+        <div style="position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 16px; height: 16px; border-radius: 50%; background: #3b6fd4; border: 3px solid #fff; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3)"></div>
+
+        <!-- Pins -->
+        <sc-if value="{{ c1 }}" hint-placeholder-val="{{ true }}">
+          <div onClick="{{ p1 }}" style="position: absolute; left: 38%; top: 44%; transform: translate(-50%, -50%) scale({{s1}}); width: 32px; height: 32px; border-radius: 50%; border: 3px solid #fff; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35); display: flex; align-items: center; justify-content: center; background: #2FA8B8; color: #fff; cursor: pointer; z-index: {{z1}}">
+            <svg class="ico" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m4 4 2.5 2.5"/><path d="M13.5 6.5a4.95 4.95 0 0 0-7 7"/><path d="M15 5 5 15"/></svg>
+          </div>
+        </sc-if>
+        <sc-if value="{{ c2 }}" hint-placeholder-val="{{ true }}">
+          <div onClick="{{ p2 }}" style="position: absolute; left: 55%; top: 31%; transform: translate(-50%, -50%) scale({{s2}}); width: 32px; height: 32px; border-radius: 50%; border: 3px solid #fff; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35); display: flex; align-items: center; justify-content: center; background: #E8842C; color: #fff; cursor: pointer; z-index: {{z2}}">
+            <svg class="ico" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/></svg>
+          </div>
+        </sc-if>
+        <sc-if value="{{ c3 }}" hint-placeholder-val="{{ true }}">
+          <div onClick="{{ p3 }}" style="position: absolute; left: 30%; top: 62%; transform: translate(-50%, -50%) scale({{s3}}); width: 32px; height: 32px; border-radius: 50%; border: 3px solid #fff; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35); display: flex; align-items: center; justify-content: center; background: #3BA55C; color: #fff; cursor: pointer; z-index: {{z3}}">
+            <svg class="ico" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M12 10v6"/><path d="M9 13h6"/></svg>
+          </div>
+        </sc-if>
+        <sc-if value="{{ c4 }}" hint-placeholder-val="{{ true }}">
+          <div onClick="{{ p4 }}" style="position: absolute; left: 64%; top: 58%; transform: translate(-50%, -50%) scale({{s4}}); width: 32px; height: 32px; border-radius: 50%; border: 3px solid #fff; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35); display: flex; align-items: center; justify-content: center; background: #4A80E8; color: #fff; cursor: pointer; z-index: {{z4}}">
+            <svg class="ico" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg>
+          </div>
+        </sc-if>
+        <sc-if value="{{ c5 }}" hint-placeholder-val="{{ true }}">
+          <div onClick="{{ p5 }}" style="position: absolute; left: 20%; top: 26%; transform: translate(-50%, -50%) scale({{s5}}); width: 32px; height: 32px; border-radius: 50%; border: 3px solid #fff; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35); display: flex; align-items: center; justify-content: center; background: #D64545; color: #fff; cursor: pointer; z-index: {{z5}}">
+            <svg class="ico" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+          </div>
+        </sc-if>
+        <sc-if value="{{ c6 }}" hint-placeholder-val="{{ true }}">
+          <div onClick="{{ p6 }}" style="position: absolute; left: 82%; top: 38%; transform: translate(-50%, -50%) scale({{s6}}); width: 32px; height: 32px; border-radius: 50%; border: 3px solid #fff; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35); display: flex; align-items: center; justify-content: center; background: #2FA8B8; color: #fff; cursor: pointer; z-index: {{z6}}">
+            <svg class="ico" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m4 4 2.5 2.5"/><path d="M13.5 6.5a4.95 4.95 0 0 0-7 7"/><path d="M15 5 5 15"/></svg>
+          </div>
+        </sc-if>
+        <sc-if value="{{ c7 }}" hint-placeholder-val="{{ true }}">
+          <div onClick="{{ p7 }}" style="position: absolute; left: 46%; top: 76%; transform: translate(-50%, -50%) scale({{s7}}); width: 32px; height: 32px; border-radius: 50%; border: 3px solid #fff; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35); display: flex; align-items: center; justify-content: center; background: #7B8794; color: #fff; cursor: pointer; z-index: {{z7}}">
+            <svg class="ico" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+          </div>
+        </sc-if>
+        <sc-if value="{{ c8 }}" hint-placeholder-val="{{ true }}">
+          <div onClick="{{ p8 }}" style="position: absolute; left: 74%; top: 72%; transform: translate(-50%, -50%) scale({{s8}}); width: 32px; height: 32px; border-radius: 50%; border: 3px solid #fff; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35); display: flex; align-items: center; justify-content: center; background: #5B6B8C; color: #fff; cursor: pointer; z-index: {{z8}}">
+            <svg class="ico" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1 1 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/></svg>
+          </div>
+        </sc-if>
+        <sc-if value="{{ c9 }}" hint-placeholder-val="{{ true }}">
+          <div onClick="{{ p9 }}" style="position: absolute; left: 15%; top: 52%; transform: translate(-50%, -50%) scale({{s9}}); width: 32px; height: 32px; border-radius: 50%; border: 3px solid #fff; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35); display: flex; align-items: center; justify-content: center; background: #8E5FBF; color: #fff; cursor: pointer; z-index: {{z9}}">
+            <svg class="ico" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+          </div>
+        </sc-if>
+
+        <!-- Selected callout -->
+        <sc-if value="{{ hasSel }}" hint-placeholder-val="{{ true }}">
+          <div style="position: absolute; left: 20px; bottom: 20px; background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; width: 320px; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.14)">
+            <div style="display: flex; align-items: flex-start; gap: 10px">
+              <span style="width: 34px; height: 34px; border-radius: 9px; flex-shrink: 0; background: {{selColor}}"></span>
+              <div style="min-width: 0">
+                <div style="font-size: 15px; font-weight: 700; line-height: 1.3">{{ selName }}</div>
+                <div style="color: var(--muted); font-size: 12px; margin-top: 3px">{{ selOrg }} · {{ selDist }}</div>
+              </div>
+            </div>
+            <div style="color: var(--muted); font-size: 12px; margin-top: 9px; line-height: 1.45">{{ selHours }}</div>
+            <a href="#" style="display: inline-flex; align-items: center; gap: 5px; font-size: 13px; font-weight: 700; margin-top: 10px">
+              <svg class="ico" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 14 5-5-5-5"/><path d="M4 20v-7a4 4 0 0 1 4-4h12"/></svg>
+              Directions
+            </a>
+          </div>
+        </sc-if>
+
+        <!-- Category key -->
+        <div style="position: absolute; left: 20px; top: 20px; background: rgba(255, 255, 255, 0.94); border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px">
+          <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-bottom: 9px">Category key</div>
+          <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 7px 18px">
+            <div style="display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 600"><span style="width: 10px; height: 10px; border-radius: 50%; background: #E8842C"></span>Food</div>
+            <div style="display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 600"><span style="width: 10px; height: 10px; border-radius: 50%; background: #4A80E8"></span>Shelter</div>
+            <div style="display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 600"><span style="width: 10px; height: 10px; border-radius: 50%; background: #3BA55C"></span>Health</div>
+            <div style="display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 600"><span style="width: 10px; height: 10px; border-radius: 50%; background: #2FA8B8"></span>Hygiene</div>
+            <div style="display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 600"><span style="width: 10px; height: 10px; border-radius: 50%; background: #D64545"></span>Crisis</div>
+            <div style="display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 600"><span style="width: 10px; height: 10px; border-radius: 50%; background: #8E5FBF"></span>Youth</div>
+            <div style="display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 600"><span style="width: 10px; height: 10px; border-radius: 50%; background: #5B6B8C"></span>Veterans</div>
+            <div style="display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 600"><span style="width: 10px; height: 10px; border-radius: 50%; background: #7B8794"></span>Support</div>
+          </div>
+        </div>
+
+        <div style="position: absolute; right: 20px; bottom: 20px; display: flex; flex-direction: column; gap: 8px">
+          <button style="width: 40px; height: 40px; border-radius: 12px; border: 1px solid var(--border); background: var(--panel); color: var(--text); font-size: 18px; font-weight: 600; cursor: pointer; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08)">+</button>
+          <button style="width: 40px; height: 40px; border-radius: 12px; border: 1px solid var(--border); background: var(--panel); color: var(--text); font-size: 18px; font-weight: 600; cursor: pointer; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08)">−</button>
+          <button style="width: 40px; height: 40px; border-radius: 12px; border: 1px solid var(--border); background: var(--panel); color: var(--accent); display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08)">
+            <svg class="ico" viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+
+<script data-dc-script data-props='{}'>
+// Colors match client/src/lib.js CATEGORIES exactly.
+const ROWS = [
+  { i: 1, type: 'hygiene',  miles: 0.4, color: '#2FA8B8', name: 'Cherith Brook Catholic Worker', org: 'Cherith Brook', hours: 'Showers Tue & Thu 7:00am-10:30am', text: 'cherith brook hygiene showers 64127' },
+  { i: 2, type: 'food',     miles: 1.2, color: '#E8842C', name: 'Bishop Sullivan / One City Cafe', org: 'Bishop Sullivan Center', hours: 'Mon-Thu 3:00pm-5:00pm; Fri 11:00am-2:00pm', text: 'bishop sullivan one city cafe food meals troost 64110' },
+  { i: 3, type: 'health',   miles: 1.6, color: '#3BA55C', name: 'Care Beyond the Boulevard @ Cherith Brook', org: 'Care Beyond the Boulevard', hours: '2nd & 4th Tue 8:30am-10:30am; Thu 5:00pm-7:00pm', text: 'care beyond boulevard clinic medical health 64127' },
+  { i: 4, type: 'shelter',  miles: 2.1, color: '#4A80E8', name: "City Union Mission Men's Shelter", org: 'City Union Mission', hours: 'Call for availability', text: 'city union mission shelter beds 64106' },
+  { i: 5, type: 'crisis',   miles: 3.4, color: '#D64545', name: 'Rose Brooks Center', org: 'Rose Brooks Center', hours: '24/7 hotline', text: 'rose brooks crisis domestic violence hotline' },
+  { i: 6, type: 'hygiene',  miles: 2.4, color: '#2FA8B8', name: 'Westport Presbyterian Church - Showers', org: 'Westport Presbyterian Church', hours: 'Showers Wed 9:00am-12:00pm', text: 'westport presbyterian showers hygiene 64111' },
+  { i: 7, type: 'support',  miles: 2.8, color: '#7B8794', name: 'The Beehive', org: 'The Beehive', hours: 'Housing assistance Tue 11:00am-3:00pm', text: 'beehive housing assistance support 64109' },
+  { i: 8, type: 'veterans', miles: 4.0, color: '#5B6B8C', name: 'Veterans Community Project - Welcome Center', org: 'Veterans Community Project', hours: 'Mon 10:00am-4:00pm; Tue-Thu 9:00am-4:00pm', text: 'veterans community project welcome center 64131' },
+  { i: 9, type: 'youth',    miles: 3.1, color: '#8E5FBF', name: 'The HALO Foundation', org: 'The HALO Foundation', hours: 'Call for hours', text: 'halo foundation youth 64102' }
+];
+
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { nav: 'find', category: 'all', radius: 10, query: '', selected: 1 };
+  }
+
+  shows(row) {
+    const s = this.state;
+    if (s.category !== 'all' && row.type !== s.category) return false;
+    if (row.miles > s.radius) return false;
+    const q = s.query.trim().toLowerCase();
+    if (q && (row.text + ' ' + row.name.toLowerCase() + ' ' + row.org.toLowerCase()).indexOf(q) === -1) return false;
+    return true;
+  }
+
+  renderVals() {
+    const s = this.state;
+    const out = {};
+
+    // Nav rail
+    ['Find', 'News', 'Post', 'Admin'].forEach((label) => {
+      const key = label.toLowerCase();
+      out['bg' + label] = s.nav === key ? '#eaf0fb' : 'transparent';
+      out['fg' + label] = s.nav === key ? '#3b6fd4' : '#6b7280';
+      out['nav' + label] = () => this.setState({ nav: key });
+    });
+
+    // Category chips
+    const chips = [
+      ['All', 'all', '#3b6fd4'], ['Food', 'food', '#E8842C'], ['Shelter', 'shelter', '#4A80E8'],
+      ['Health', 'health', '#3BA55C'], ['Hygiene', 'hygiene', '#2FA8B8'], ['Crisis', 'crisis', '#D64545'],
+      ['Youth', 'youth', '#8E5FBF'], ['Veterans', 'veterans', '#5B6B8C'], ['Support', 'support', '#7B8794']
+    ];
+    chips.forEach((c) => {
+      const name = c[0], key = c[1], color = c[2];
+      const on = s.category === key;
+      out['bg' + name] = on ? color : '#f4f5f8';
+      out['bd' + name] = on ? color : '#dde0e6';
+      out['fg' + name] = on ? '#ffffff' : '#1c1e21';
+      out['cat' + name] = () => this.setState({ category: on ? 'all' : key, selected: null });
+    });
+
+    // Radius pills
+    [1, 3, 5, 10, 25].forEach((mi) => {
+      const on = s.radius === mi;
+      out['bgR' + mi] = on ? '#ffffff' : 'transparent';
+      out['fgR' + mi] = on ? '#1c1e21' : '#6b7280';
+      out['shR' + mi] = on ? '0 1px 3px rgba(0, 0, 0, 0.15)' : 'none';
+      out['rad' + mi] = () => this.setState({ radius: mi });
+    });
+
+    // Cards and pins
+    let n = 0;
+    let sel = null;
+    ROWS.forEach((row) => {
+      const on = this.shows(row);
+      if (on) n += 1;
+      const picked = s.selected === row.i;
+      if (on && picked) sel = row;
+      out['c' + row.i] = on;
+      out['b' + row.i] = picked ? '#3b6fd4' : '#dde0e6';
+      out['s' + row.i] = picked ? '1.25' : '1';
+      out['z' + row.i] = picked ? '5' : '2';
+      out['p' + row.i] = () => this.setState({ selected: row.i });
+    });
+
+    out.count = n;
+    out.empty = n === 0;
+    out.query = s.query;
+    out.onQuery = (e) => this.setState({ query: e.target.value });
+    out.hasSel = !!sel;
+    out.selName = sel ? sel.name : '';
+    out.selOrg = sel ? sel.org : '';
+    out.selDist = sel ? sel.miles.toFixed(1) + ' mi' : '';
+    out.selHours = sel ? sel.hours : '';
+    out.selColor = sel ? sel.color : '#7B8794';
+
+    return out;
+  }
+}
+</script>
+</body>
+</html>

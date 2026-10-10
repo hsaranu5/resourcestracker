@@ -1,0 +1,339 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <style>
+    :root {
+      --bg: #eef0f4;
+      --panel: #ffffff;
+      --card: #f4f5f8;
+      --border: #dde0e6;
+      --text: #1c1e21;
+      --muted: #6b7280;
+      --accent: #3b6fd4;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { color: #2f5cb0; }
+    button { font-family: inherit; }
+    .ico { flex-shrink: 0; }
+    .rail-item:hover { background: #f4f5f8; }
+    .row:hover { background: var(--card); }
+    .fld {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #dde0e6;
+      border-radius: 8px;
+      background: #f4f5f8;
+      color: #1c1e21;
+      font-size: 14px;
+      font-family: inherit;
+    }
+    .fld:focus { outline: none; border-color: #3b6fd4; background: #fff; }
+    .lbl { display: block; margin-bottom: 5px; color: #6b7280; font-size: 13px; font-weight: 600; }
+    .scroll::-webkit-scrollbar { width: 8px; }
+    .scroll::-webkit-scrollbar-thumb { background: #d5d9e0; border-radius: 4px; }
+  </style>
+</helmet>
+
+<div style="width: 1440px; height: 900px; display: flex; background: var(--bg); overflow: hidden">
+
+  <!-- ============================ LEFT NAV RAIL ============================ -->
+  <nav style="width: 64px; flex-shrink: 0; background: var(--panel); border-right: 1px solid var(--border); display: flex; flex-direction: column; align-items: center; padding: 12px 0; gap: 4px">
+    <div style="width: 36px; height: 36px; border-radius: 10px; background: var(--accent); color: #fff; display: flex; align-items: center; justify-content: center; margin-bottom: 12px">
+      <svg class="ico" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+    </div>
+    <button class="rail-item" style="width: 52px; border: none; background: transparent; color: #6b7280; border-radius: 12px; padding: 9px 0 7px; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer">
+      <svg class="ico" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+      <span style="font-size: 10px; font-weight: 700">Find</span>
+    </button>
+    <button class="rail-item" style="width: 52px; border: none; background: transparent; color: #6b7280; border-radius: 12px; padding: 9px 0 7px; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer">
+      <svg class="ico" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 11 18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg>
+      <span style="font-size: 10px; font-weight: 700">News</span>
+    </button>
+    <button class="rail-item" style="width: 52px; border: none; background: transparent; color: #6b7280; border-radius: 12px; padding: 9px 0 7px; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer">
+      <svg class="ico" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+      <span style="font-size: 10px; font-weight: 700">Post</span>
+    </button>
+    <button class="rail-item" style="width: 52px; border: none; background: #eaf0fb; color: #3b6fd4; border-radius: 12px; padding: 9px 0 7px; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer">
+      <svg class="ico" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3h7v7H3z"/><path d="M14 3h7v7h-7z"/><path d="M14 14h7v7h-7z"/><path d="M3 14h7v7H3z"/></svg>
+      <span style="font-size: 10px; font-weight: 700">Admin</span>
+    </button>
+    <div style="flex-grow: 1"></div>
+    <button style="width: 36px; height: 36px; border-radius: 10px; border: 1px solid var(--border); background: var(--card); color: var(--text); display: flex; align-items: center; justify-content: center; cursor: pointer">
+      <svg class="ico" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+    </button>
+  </nav>
+
+  <!-- ============================ ADMIN SUB-NAV ============================ -->
+  <aside style="width: 216px; flex-shrink: 0; background: var(--panel); border-right: 1px solid var(--border); padding: 18px 12px; display: flex; flex-direction: column; gap: 3px">
+    <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); padding: 0 10px 10px">Admin</div>
+    <div class="rail-item" style="display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px; color: var(--text); font-size: 14px; font-weight: 600; cursor: pointer">
+      <svg class="ico" viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="#6b7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+      Resources
+      <span style="margin-left: auto; color: var(--muted); font-size: 12px; font-weight: 700">116</span>
+    </div>
+    <div class="rail-item" style="display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px; color: var(--text); font-size: 14px; font-weight: 600; cursor: pointer">
+      <svg class="ico" viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="#6b7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v4"/><path d="M16 2v4"/><path d="M3 6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M3 10h18"/></svg>
+      Events
+      <span style="margin-left: auto; color: var(--muted); font-size: 12px; font-weight: 700">20</span>
+    </div>
+    <div class="rail-item" style="display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px; color: var(--text); font-size: 14px; font-weight: 600; cursor: pointer">
+      <svg class="ico" viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="#6b7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 11 18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg>
+      Posts
+      <span style="margin-left: auto; color: var(--muted); font-size: 12px; font-weight: 700">3</span>
+    </div>
+    <div style="display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px; background: #eaf0fb; color: #3b6fd4; font-size: 14px; font-weight: 700; cursor: pointer">
+      <svg class="ico" viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      Verified orgs
+      <span style="margin-left: auto; font-size: 12px; font-weight: 700">{{ activeCount }}</span>
+    </div>
+    <div style="height: 1px; background: var(--border); margin: 14px 10px"></div>
+    <div class="rail-item" style="display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px; color: var(--text); font-size: 14px; font-weight: 600; cursor: pointer">
+      <svg class="ico" viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="#6b7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 14 5-5-5-5"/><path d="M4 20v-7a4 4 0 0 1 4-4h12"/></svg>
+      Import &amp; export
+    </div>
+    <div style="flex-grow: 1"></div>
+  </aside>
+
+  <!-- ============================ MAIN ============================ -->
+  <div style="flex-grow: 1; display: flex; flex-direction: column; min-width: 0">
+
+    <header style="background: var(--panel); border-bottom: 1px solid var(--border); padding: 14px 24px; display: flex; align-items: center; gap: 16px; flex-shrink: 0">
+      <div>
+        <h1 style="margin: 0; font-size: 20px; font-weight: 700; letter-spacing: 0.2px">Verified organizations</h1>
+        <div style="color: var(--muted); font-size: 12px; margin-top: 2px">Who can publish events and posts to the community feed</div>
+      </div>
+      <div style="flex-grow: 1"></div>
+      <button onClick="{{ openAdd }}" style="display: inline-flex; align-items: center; gap: 7px; background: var(--accent); color: #fff; border: none; border-radius: 999px; padding: 10px 18px; font-size: 13px; font-weight: 700; cursor: pointer">
+        <svg class="ico" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+        Add an organization
+      </button>
+      <div style="display: flex; align-items: center; gap: 9px; border-left: 1px solid var(--border); padding-left: 16px">
+        <span style="width: 30px; height: 30px; border-radius: 999px; background: #5B6B8C; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700">GM</span>
+        <div style="line-height: 1.3">
+          <div style="font-size: 13px; font-weight: 700">Genova M.</div>
+          <div style="font-size: 11px; color: var(--muted)">Administrator</div>
+        </div>
+      </div>
+    </header>
+
+    <div class="scroll" style="flex-grow: 1; overflow-y: auto; padding: 22px 24px 32px; min-height: 0">
+      <div style="max-width: 960px">
+
+        <!-- Explanation of the model, in plain words -->
+        <div style="display: flex; align-items: flex-start; gap: 12px; background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 16px 18px; margin-bottom: 20px">
+          <svg class="ico" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#3b6fd4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-top: 1px"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+          <div style="line-height: 1.55; font-size: 13px">
+            <strong>There are no passwords.</strong> <span style="color: var(--muted)">An organization on this list enters its email, we send a 6-digit code, and that signs them in. Removing an address here ends their access at once — any open session stops working the next time they publish.</span>
+          </div>
+        </div>
+
+        <!-- Add form -->
+        <sc-if value="{{ addOpen }}" hint-placeholder-val="{{ false }}">
+          <div style="background: var(--panel); border: 1px solid var(--accent); border-radius: 12px; padding: 20px; margin-bottom: 20px">
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 16px">
+              <h3 style="margin: 0; font-size: 16px; font-weight: 700">Add an organization</h3>
+              <div style="flex-grow: 1"></div>
+              <button onClick="{{ closeAdd }}" style="border: none; background: var(--card); color: var(--muted); width: 30px; height: 30px; border-radius: 999px; cursor: pointer; display: flex; align-items: center; justify-content: center">
+                <svg class="ico" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+              </button>
+            </div>
+            <div style="display: grid; grid-template-columns: 1.3fr 1fr auto; gap: 16px; align-items: end">
+              <div>
+                <label class="lbl" for="o-name">Organization name</label>
+                <input class="fld" id="o-name" type="text" placeholder="Micah Ministries" value="{{ newName }}" onChange="{{ onNewName }}" />
+              </div>
+              <div>
+                <label class="lbl" for="o-email">Email address</label>
+                <input class="fld" id="o-email" type="email" placeholder="outreach@micahkc.org" value="{{ newEmail }}" onChange="{{ onNewEmail }}" />
+              </div>
+              <button onClick="{{ closeAdd }}" style="border: none; background: var(--accent); color: #fff; border-radius: 999px; padding: 11px 22px; font-size: 14px; font-weight: 700; cursor: pointer; height: 40px">Add</button>
+            </div>
+            <div style="color: var(--muted); font-size: 12px; margin-top: 12px; line-height: 1.5">One address per organization. Use a shared inbox the outreach team actually reads — codes expire quickly, and whoever holds the inbox can publish.</div>
+          </div>
+        </sc-if>
+
+        <!-- Table -->
+        <div style="background: var(--panel); border: 1px solid var(--border); border-radius: 12px; overflow: hidden">
+
+          <div style="display: grid; grid-template-columns: 2fr 2fr 1.1fr 1.1fr 100px; align-items: center; padding: 0 20px; height: 44px; background: var(--bg); border-bottom: 1px solid var(--border); color: var(--muted); font-size: 11px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase">
+            <span>Organization</span>
+            <span>Email</span>
+            <span>Published</span>
+            <span>Last sign-in</span>
+            <span style="text-align: right">Can post</span>
+          </div>
+
+          <div class="row" style="display: grid; grid-template-columns: 2fr 2fr 1.1fr 1.1fr 100px; align-items: center; padding: 0 20px; min-height: 62px; border-bottom: 1px solid var(--border)">
+            <div style="display: flex; align-items: center; gap: 11px; padding-right: 14px">
+              <span style="width: 32px; height: 32px; border-radius: 999px; background: #3BA55C; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; flex-shrink: 0">CB</span>
+              <span style="font-size: 14px; font-weight: 700; line-height: 1.35">Care Beyond the Boulevard</span>
+            </div>
+            <span style="color: var(--muted); font-size: 13px; padding-right: 12px">clinic@carebeyond.org</span>
+            <span style="color: var(--muted); font-size: 13px">6 events · 2 posts</span>
+            <span style="color: var(--muted); font-size: 13px">Today</span>
+            <div style="display: flex; justify-content: flex-end">
+              <button onClick="{{ t1 }}" style="width: 44px; height: 26px; border-radius: 999px; border: none; background: {{bg1}}; position: relative; cursor: pointer; padding: 0">
+                <span style="position: absolute; top: 3px; left: {{k1}}; width: 20px; height: 20px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3)"></span>
+              </button>
+            </div>
+          </div>
+
+          <div class="row" style="display: grid; grid-template-columns: 2fr 2fr 1.1fr 1.1fr 100px; align-items: center; padding: 0 20px; min-height: 62px; border-bottom: 1px solid var(--border)">
+            <div style="display: flex; align-items: center; gap: 11px; padding-right: 14px">
+              <span style="width: 32px; height: 32px; border-radius: 999px; background: #2FA8B8; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; flex-shrink: 0">CB</span>
+              <span style="font-size: 14px; font-weight: 700; line-height: 1.35">Cherith Brook</span>
+            </div>
+            <span style="color: var(--muted); font-size: 13px; padding-right: 12px">hello@cherithbrook.org</span>
+            <span style="color: var(--muted); font-size: 13px">1 post</span>
+            <span style="color: var(--muted); font-size: 13px">Yesterday</span>
+            <div style="display: flex; justify-content: flex-end">
+              <button onClick="{{ t2 }}" style="width: 44px; height: 26px; border-radius: 999px; border: none; background: {{bg2}}; position: relative; cursor: pointer; padding: 0">
+                <span style="position: absolute; top: 3px; left: {{k2}}; width: 20px; height: 20px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3)"></span>
+              </button>
+            </div>
+          </div>
+
+          <div class="row" style="display: grid; grid-template-columns: 2fr 2fr 1.1fr 1.1fr 100px; align-items: center; padding: 0 20px; min-height: 62px; border-bottom: 1px solid var(--border)">
+            <div style="display: flex; align-items: center; gap: 11px; padding-right: 14px">
+              <span style="width: 32px; height: 32px; border-radius: 999px; background: #5B6B8C; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; flex-shrink: 0">VC</span>
+              <span style="font-size: 14px; font-weight: 700; line-height: 1.35">Veterans Community Project</span>
+            </div>
+            <span style="color: var(--muted); font-size: 13px; padding-right: 12px">outreach@vcp.org</span>
+            <span style="color: var(--muted); font-size: 13px">2 events · 1 post</span>
+            <span style="color: var(--muted); font-size: 13px">3 days ago</span>
+            <div style="display: flex; justify-content: flex-end">
+              <button onClick="{{ t3 }}" style="width: 44px; height: 26px; border-radius: 999px; border: none; background: {{bg3}}; position: relative; cursor: pointer; padding: 0">
+                <span style="position: absolute; top: 3px; left: {{k3}}; width: 20px; height: 20px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3)"></span>
+              </button>
+            </div>
+          </div>
+
+          <div class="row" style="display: grid; grid-template-columns: 2fr 2fr 1.1fr 1.1fr 100px; align-items: center; padding: 0 20px; min-height: 62px; border-bottom: 1px solid var(--border)">
+            <div style="display: flex; align-items: center; gap: 11px; padding-right: 14px">
+              <span style="width: 32px; height: 32px; border-radius: 999px; background: #E8842C; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; flex-shrink: 0">BS</span>
+              <span style="font-size: 14px; font-weight: 700; line-height: 1.35">Bishop Sullivan Center</span>
+            </div>
+            <span style="color: var(--muted); font-size: 13px; padding-right: 12px">info@bishopsullivan.org</span>
+            <span style="color: var(--muted); font-size: 13px">4 events</span>
+            <span style="color: var(--muted); font-size: 13px">1 week ago</span>
+            <div style="display: flex; justify-content: flex-end">
+              <button onClick="{{ t4 }}" style="width: 44px; height: 26px; border-radius: 999px; border: none; background: {{bg4}}; position: relative; cursor: pointer; padding: 0">
+                <span style="position: absolute; top: 3px; left: {{k4}}; width: 20px; height: 20px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3)"></span>
+              </button>
+            </div>
+          </div>
+
+          <div class="row" style="display: grid; grid-template-columns: 2fr 2fr 1.1fr 1.1fr 100px; align-items: center; padding: 0 20px; min-height: 62px; border-bottom: 1px solid var(--border)">
+            <div style="display: flex; align-items: center; gap: 11px; padding-right: 14px">
+              <span style="width: 32px; height: 32px; border-radius: 999px; background: #4A80E8; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; flex-shrink: 0">CU</span>
+              <span style="font-size: 14px; font-weight: 700; line-height: 1.35">City Union Mission</span>
+            </div>
+            <span style="color: var(--muted); font-size: 13px; padding-right: 12px">contact@cityunionmission.org</span>
+            <span style="color: var(--muted); font-size: 13px">—</span>
+            <span style="color: var(--muted); font-size: 13px">Never</span>
+            <div style="display: flex; justify-content: flex-end">
+              <button onClick="{{ t5 }}" style="width: 44px; height: 26px; border-radius: 999px; border: none; background: {{bg5}}; position: relative; cursor: pointer; padding: 0">
+                <span style="position: absolute; top: 3px; left: {{k5}}; width: 20px; height: 20px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3)"></span>
+              </button>
+            </div>
+          </div>
+
+          <div class="row" style="display: grid; grid-template-columns: 2fr 2fr 1.1fr 1.1fr 100px; align-items: center; padding: 0 20px; min-height: 62px; border-bottom: 1px solid var(--border)">
+            <div style="display: flex; align-items: center; gap: 11px; padding-right: 14px">
+              <span style="width: 32px; height: 32px; border-radius: 999px; background: #8E5FBF; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; flex-shrink: 0">HF</span>
+              <span style="font-size: 14px; font-weight: 700; line-height: 1.35">The HALO Foundation</span>
+            </div>
+            <span style="color: var(--muted); font-size: 13px; padding-right: 12px">team@haloworldwide.org</span>
+            <span style="color: var(--muted); font-size: 13px">1 event</span>
+            <span style="color: var(--muted); font-size: 13px">2 weeks ago</span>
+            <div style="display: flex; justify-content: flex-end">
+              <button onClick="{{ t6 }}" style="width: 44px; height: 26px; border-radius: 999px; border: none; background: {{bg6}}; position: relative; cursor: pointer; padding: 0">
+                <span style="position: absolute; top: 3px; left: {{k6}}; width: 20px; height: 20px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3)"></span>
+              </button>
+            </div>
+          </div>
+
+          <div class="row" style="display: grid; grid-template-columns: 2fr 2fr 1.1fr 1.1fr 100px; align-items: center; padding: 0 20px; min-height: 62px">
+            <div style="display: flex; align-items: center; gap: 11px; padding-right: 14px">
+              <span style="width: 32px; height: 32px; border-radius: 999px; background: #7B8794; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; flex-shrink: 0">TB</span>
+              <span style="font-size: 14px; font-weight: 700; line-height: 1.35">The Beehive</span>
+            </div>
+            <span style="color: var(--muted); font-size: 13px; padding-right: 12px">hello@thebeehivekc.org</span>
+            <span style="color: var(--muted); font-size: 13px">—</span>
+            <span style="color: var(--muted); font-size: 13px">Never</span>
+            <div style="display: flex; justify-content: flex-end">
+              <button onClick="{{ t7 }}" style="width: 44px; height: 26px; border-radius: 999px; border: none; background: {{bg7}}; position: relative; cursor: pointer; padding: 0">
+                <span style="position: absolute; top: 3px; left: {{k7}}; width: 20px; height: 20px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3)"></span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 12px; margin-top: 14px">
+          <svg class="ico" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+          {{ activeCount }} of 7 organizations can publish right now.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+
+<script data-dc-script data-props='{}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = {
+      on: { 1: true, 2: true, 3: true, 4: true, 5: false, 6: true, 7: false },
+      addOpen: false,
+      newName: '',
+      newEmail: ''
+    };
+  }
+
+  renderVals() {
+    const s = this.state;
+    const out = {
+      addOpen: s.addOpen,
+      openAdd: () => this.setState({ addOpen: true }),
+      closeAdd: () => this.setState({ addOpen: false }),
+      newName: s.newName,
+      newEmail: s.newEmail,
+      onNewName: (e) => this.setState({ newName: e.target.value }),
+      onNewEmail: (e) => this.setState({ newEmail: e.target.value })
+    };
+
+    let active = 0;
+    [1, 2, 3, 4, 5, 6, 7].forEach((i) => {
+      const on = !!s.on[i];
+      if (on) active += 1;
+      out['bg' + i] = on ? '#1e8e3e' : '#c6cbd3';
+      out['k' + i] = on ? '21px' : '3px';
+      out['t' + i] = () => {
+        const next = Object.assign({}, this.state.on);
+        next[i] = !next[i];
+        this.setState({ on: next });
+      };
+    });
+
+    out.activeCount = active;
+    return out;
+  }
+}
+</script>
+</body>
+</html>
