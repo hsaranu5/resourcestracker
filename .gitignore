@@ -10,3 +10,6 @@ client/.env
 .vercel
 .env*
 !.env.example
+
+# graphify knowledge graph output
+graphify-out/
