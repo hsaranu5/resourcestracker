@@ -167,6 +167,7 @@ const verify = async (req, res) => {
     res.json({
       organization: org.org_name,
       email,
+      role: org.role,
       expiresAt,
       token // for the iOS app; web clients rely on the cookie
     });
@@ -177,7 +178,7 @@ const verify = async (req, res) => {
 
 /** GET /api/auth/me — is this request signed in, and as whom? */
 const me = (req, res) => {
-  res.json({ organization: req.organization, email: req.sessionEmail });
+  res.json({ organization: req.organization, email: req.sessionEmail, role: req.role });
 };
 
 /** POST /api/auth/logout */

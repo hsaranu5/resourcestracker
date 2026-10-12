@@ -8,6 +8,8 @@ const mobileController = require('../controllers/mobileController');
 const communityController = require('../controllers/communityController');
 const authController = require('../controllers/authController');
 const requireOrgSession = require('../middleware/requireOrgSession');
+const requireRole = require('../middleware/requireRole');
+const adminController = require('../controllers/adminController');
 const cronController = require('../controllers/cronController');
 
 // Verified poster auth (design/VERIFIED-POSTER-AUTH.md).
@@ -33,9 +35,21 @@ router.get('/resources/export', mobileController.exportAll);
 // Resources routes
 router.get('/resources', resourcesController.getAll);
 router.get('/resources/:id', resourcesController.getById);
-router.post('/resources', resourcesController.create);
-router.put('/resources/:id', resourcesController.update);
-router.delete('/resources/:id', resourcesController.delete);
+// Writes are for editors and admins (the /admin Resources screen). These were
+// open to anyone while the server only listened on a private network.
+const editor = [requireOrgSession, requireRole('editor')];
+const admin = [requireOrgSession, requireRole('admin')];
+router.post('/resources', editor, resourcesController.create);
+router.put('/resources/:id', editor, resourcesController.update);
+router.delete('/resources/:id', editor, resourcesController.delete);
+
+// Admin area: change history, address lookup, and the team (the allowlist).
+router.get('/admin/resources/:id/history', editor, resourcesController.history);
+router.get('/admin/geocode', editor, adminController.geocode);
+router.get('/admin/team', admin, adminController.listTeam);
+router.post('/admin/team', admin, adminController.addMember);
+router.patch('/admin/team/:id', admin, adminController.updateMember);
+router.delete('/admin/team/:id', admin, adminController.removeMember);
 
 // Search routes
 router.get('/search', searchController.search);
@@ -54,7 +68,7 @@ router.get('/cron/maintenance', cronController.requireCronSecret, cronController
 
 // Organizations routes
 router.get('/organizations', organizationsController.getAll);
-router.post('/organizations', organizationsController.create);
+router.post('/organizations', admin, organizationsController.create);
 
 module.exports = router;
 

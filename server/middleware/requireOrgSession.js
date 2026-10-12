@@ -11,7 +11,7 @@
  *   - the httpOnly `org_session` cookie (web client), or
  *   - `Authorization: Bearer <token>` (iOS app, token kept in Keychain).
  *
- * Sets req.organization, req.sessionEmail, req.sessionId.
+ * Sets req.organization, req.sessionEmail, req.sessionId, req.role.
  */
 
 const crypto = require('crypto');
@@ -63,6 +63,7 @@ const requireOrgSession = async (req, res, next) => {
     }
 
     req.organization = org.org_name; // always current, never client-supplied
+    req.role = org.role || 'publisher'; // read per request, so a demotion is immediate
     req.sessionEmail = session.email;
     req.sessionId = session.id;
 
