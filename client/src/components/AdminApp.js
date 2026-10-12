@@ -5,6 +5,8 @@ import AddPostForm from './AddPostForm';
 import ResourcesPage from './admin/ResourcesPage';
 import ResourceEditor from './admin/ResourceEditor';
 import TeamPage from './admin/TeamPage';
+import ImportPage, { ImportReview } from './admin/ImportPage';
+import { useImportBatch } from './admin/reviewImport';
 import { api, can, ROLES } from './admin/adminApi';
 import './admin/admin.css';
 
@@ -24,16 +26,19 @@ import './admin/admin.css';
 
 const NAV = [
   { path: '/admin/resources', label: 'Resources', icon: 'pin', role: 'editor' },
+  { path: '/admin/import', label: 'Import', icon: 'upload', role: 'editor' },
   { path: '/admin/publish', label: 'Publish', icon: 'megaphone', role: 'publisher' },
   { path: '/admin/team', label: 'Team', icon: 'users', role: 'admin' }
 ];
 
 const routeFor = (path, session) => {
-  const p = path.replace(/\/+$/, '');
+  const p = path.split('?')[0].replace(/\/+$/, '');
   if (can(session, 'editor')) {
     if (p === '/admin/resources/new') return { page: 'editor', id: null, nav: '/admin/resources' };
     const edit = p.match(/^\/admin\/resources\/(\d+)$/);
     if (edit) return { page: 'editor', id: edit[1], nav: '/admin/resources' };
+    const review = p.match(/^\/admin\/import\/(new|change)\/(\w+)$/);
+    if (review) return { page: 'review', kind: review[1] === 'new' ? 'place' : 'change', id: review[2], nav: '/admin/import' };
   }
   const hit = NAV.find((n) => n.path === p);
   if (hit && can(session, hit.role)) return { page: hit.path.split('/')[2], nav: hit.path };
@@ -46,6 +51,7 @@ const AdminApp = () => {
   const [session, setSession] = useState(undefined); // undefined: checking; null: signed out
   const [path, setPath] = useState(window.location.pathname);
   const [flash, setFlash] = useState('');
+  const { batch, setBatch, update } = useImportBatch();
 
   useEffect(() => {
     api.me().then(setSession).catch(() => setSession(null));
@@ -56,7 +62,7 @@ const AdminApp = () => {
 
   const go = useCallback((to, { replace = false } = {}) => {
     window.history[replace ? 'replaceState' : 'pushState'](null, '', to);
-    setPath(to);
+    setPath(window.location.pathname);
     window.scrollTo(0, 0);
   }, []);
 
@@ -138,6 +144,21 @@ const AdminApp = () => {
         {route.page === 'resources' && <ResourcesPage go={go} onExpired={onExpired} flash={flash} />}
         {route.page === 'editor' && (
           <ResourceEditor key={route.id || 'new'} id={route.id} go={go} onExpired={onExpired} onSaved={saved} />
+        )}
+        {route.page === 'import' && (
+          <ImportPage batch={batch} setBatch={setBatch} update={update} go={go} onExpired={onExpired} flash={flash} />
+        )}
+        {route.page === 'review' && (
+          <ImportReview
+            batch={batch}
+            update={update}
+            kind={route.kind}
+            itemKey={route.id}
+            go={go}
+            onExpired={onExpired}
+            flash={flash}
+            setFlash={setFlash}
+          />
         )}
         {route.page === 'team' && <TeamPage session={session} onExpired={onExpired} />}
         {route.page === 'publish' && (
