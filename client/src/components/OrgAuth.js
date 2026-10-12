@@ -14,7 +14,7 @@ const EMAIL_KEY = 'orgLoginEmail';
  * Sign-in for verified organisations: email → 6-digit emailed code → session.
  * Calls onSignedIn({ organization, email }) when the session is established.
  */
-const OrgAuth = ({ onSignedIn, onCancel }) => {
+const OrgAuth = ({ onSignedIn, onCancel, title = 'Post as an organization' }) => {
   const [step, setStep] = useState('email'); // 'email' | 'code'
   const [email, setEmail] = useState(() => localStorage.getItem(EMAIL_KEY) || '');
   const [code, setCode] = useState('');
@@ -117,7 +117,7 @@ const OrgAuth = ({ onSignedIn, onCancel }) => {
 
   return (
     <div className="form-container">
-      <h3>Post as an organization</h3>
+      <h3>{title}</h3>
       <p style={{ fontSize: '13px', color: '#9aa0a6' }}>
         Posting is limited to organizations verified by Care Beyond.
         Enter your organization email and we'll send a sign-in code.

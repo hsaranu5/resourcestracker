@@ -23,7 +23,7 @@ const RADII = [1, 3, 5, 10, 25];
 
 // One extra path, so no router dependency. The dev server and the production
 // catch-all both serve index.html for unknown paths.
-const IS_ADMIN = typeof window !== 'undefined' && window.location.pathname.replace(/\/$/, '') === '/admin';
+const IS_ADMIN = typeof window !== 'undefined' && /^\/admin(\/|$)/.test(window.location.pathname);
 
 function App() {
   if (IS_ADMIN) return <AdminApp />;
