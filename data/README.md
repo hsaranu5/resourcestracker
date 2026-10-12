@@ -37,6 +37,12 @@ python3 build_dataset.py --geocode  # convert + fill in missing coordinates
 coordinates back into the CSV so it only runs once per address, and rejects anything
 landing outside a KC-metro bounding box.
 
+> **Since the admin area exists, the live catalogue is edited at checkpointkc.com/admin**
+> (Resources), and Supabase is the copy of record. This CSV is a snapshot of how the data
+> started. Use Export CSV in the admin to get the current data. `npm run seed` refuses to
+> run once the admin has recorded edits, because it would overwrite them; `--force`
+> overrides that.
+
 Then reseed the server if you're using it:
 
 ```bash

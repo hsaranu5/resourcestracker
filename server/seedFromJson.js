@@ -6,7 +6,12 @@
  * every time the Street Sheet is refreshed and build_dataset.py regenerates
  * the JSON.
  *
- *   node server/seedFromJson.js
+ *   node server/seedFromJson.js [--force]
+ *
+ * Once anyone has edited resources in the admin (/admin), the database is the
+ * catalogue of record and this file is a snapshot that may be behind it:
+ * seeding would put the old hours and phone numbers back. So the script
+ * refuses when resource_changes holds admin edits, unless --force is given.
  */
 
 const fs = require('fs');
@@ -64,6 +69,16 @@ const run = async () => {
     process.exit(1);
   }
 
+  const { rows: [{ edits }] } = await db.query('SELECT count(*) AS edits FROM resource_changes');
+  if (edits > 0 && !process.argv.includes('--force')) {
+    console.error(
+      `Refusing to seed: ${edits} change(s) have been made in the admin since the last import, and ` +
+      'seeding would overwrite them with data/resources.json. Edit resources at /admin instead, or ' +
+      're-run with --force if you really mean to replace them.'
+    );
+    await db.close();
+    process.exit(1);
+  }
 
   const payload = JSON.parse(fs.readFileSync(JSON_PATH, 'utf8'));
   console.log(`Seeding ${payload.resources.length} resources from ${payload.generated}...`);
