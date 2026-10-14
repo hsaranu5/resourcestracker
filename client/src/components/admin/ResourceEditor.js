@@ -76,11 +76,19 @@ const Field = ({ id, label, hint, children, wide }) => (
  * Add or edit one resource. Saving goes live immediately, so the form leans
  * on the "Verified" switch: anything not confirmed with the provider shows the
  * public "Call first" warning.
+ *
+ * From the Import screen (ImportPage's ImportReview) it opens already filled
+ * in: `prefill` for a new place, `overrides` laid over an existing row for a
+ * workbook's changes, and `importContext` for the header, the workbook's notes
+ * and Skip. Leaving then only asks for confirmation if the person typed
+ * something, since the filled-in values alone are not their unsaved work.
  */
-const ResourceEditor = ({ id, go, onExpired, onSaved }) => {
+const ResourceEditor = ({ id, go, onExpired, onSaved, prefill, overrides, importContext }) => {
   const isNew = !id;
-  const [form, setForm] = useState(isNew ? EMPTY : null);
+  const firstForm = isNew ? (prefill ? toForm({ ...EMPTY, ...prefill }) : EMPTY) : null;
+  const [form, setForm] = useState(firstForm);
   const [original, setOriginal] = useState(isNew ? EMPTY : null);
+  const [shown, setShown] = useState(firstForm);
   const [pinFor, setPinFor] = useState(null);
   const [manualPin, setManualPin] = useState(false);
   const [lookup, setLookup] = useState({ busy: false, message: '', error: false });
@@ -95,7 +103,9 @@ const ResourceEditor = ({ id, go, onExpired, onSaved }) => {
     api.resource(id)
       .then((row) => {
         const f = toForm(row);
-        setForm(f);
+        const start = overrides ? { ...f, ...overrides } : f;
+        setForm(start);
+        setShown(start);
         setOriginal(f);
         setPinFor(placeKey(f));
       })
@@ -105,13 +115,14 @@ const ResourceEditor = ({ id, go, onExpired, onSaved }) => {
   }, [id]);
 
   const dirty = useMemo(() => form && original && JSON.stringify(form) !== JSON.stringify(original), [form, original]);
+  const typed = useMemo(() => form && shown && JSON.stringify(form) !== JSON.stringify(shown), [form, shown]);
 
   useEffect(() => {
-    if (!dirty) return undefined;
+    if (!typed) return undefined;
     const warn = (e) => { e.preventDefault(); e.returnValue = ''; };
     window.addEventListener('beforeunload', warn);
     return () => window.removeEventListener('beforeunload', warn);
-  }, [dirty]);
+  }, [typed]);
 
   if (!form) {
     return error ? <p className="adm-error">{error}</p> : <p className="adm-empty">Loading…</p>;
@@ -122,9 +133,14 @@ const ResourceEditor = ({ id, go, onExpired, onSaved }) => {
   const phoneOnly = isPlaceholderAddress(form.address);
   const pinStale = hasPin && pinFor !== null && pinFor !== placeKey(form);
 
-  const leave = () => {
-    if (dirty && !window.confirm('Leave without saving? Your changes will be lost.')) return;
-    go('/admin/resources');
+  const leave = (to = importContext ? '/admin/import' : '/admin/resources') => {
+    if (typed && !window.confirm('Leave without saving? Your changes will be lost.')) return;
+    go(to);
+  };
+
+  const skip = () => {
+    if (typed && !window.confirm('Skip without saving? Your changes will be lost.')) return;
+    importContext.onSkip();
   };
 
   const lookUp = async () => {
@@ -153,7 +169,8 @@ const ResourceEditor = ({ id, go, onExpired, onSaved }) => {
     try {
       const saved = isNew ? await api.createResource(form) : await api.updateResource(id, form);
       setOriginal(form); // clears the unsaved-changes guard before navigating
-      onSaved(`Saved "${saved.name}". It's live now.`);
+      setShown(form);
+      onSaved(`Saved "${saved.name}". It's live now.`, saved);
     } catch (err) {
       handleError(err, 'Could not save. Try again.');
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -175,22 +192,41 @@ const ResourceEditor = ({ id, go, onExpired, onSaved }) => {
   return (
     <form onSubmit={save} className="adm-editor" noValidate>
       <header className="adm-head adm-head-sticky">
-        <button type="button" className="adm-btn" onClick={leave}>
-          <Icon name="back" size={15} /> Resources
+        <button type="button" className="adm-btn" onClick={() => leave()}>
+          <Icon name="back" size={15} /> {importContext ? 'Import' : 'Resources'}
         </button>
         <div className="adm-head-title">
-          <h2>{isNew ? 'Add a resource' : original.name || 'Edit resource'}</h2>
-          <p>It goes live as soon as you save. Leave Verified off if you haven't spoken to the provider.</p>
+          <h2>{isNew ? (prefill ? `Add "${prefill.name}"` : 'Add a resource') : original.name || 'Edit resource'}</h2>
+          <p>{importContext ? importContext.where : "It goes live as soon as you save. Leave Verified off if you haven't spoken to the provider."}</p>
         </div>
         <div className="adm-head-actions">
-          <button type="button" className="adm-btn" onClick={leave}>Cancel</button>
+          {importContext?.onSkip
+            ? <button type="button" className="adm-btn" onClick={skip}>Skip</button>
+            : <button type="button" className="adm-btn" onClick={() => leave()}>Cancel</button>}
           <button type="submit" className="adm-btn adm-btn-primary" disabled={saving || (!isNew && !dirty)}>
-            {saving ? 'Saving…' : isNew ? 'Save resource' : 'Save changes'}
+            {saving ? 'Saving…' : importContext?.hasNext ? 'Save and next' : isNew ? 'Save resource' : 'Save changes'}
           </button>
         </div>
       </header>
 
+      {importContext?.flash && <div className="adm-flash" role="status"><Icon name="check" size={15} /> {importContext.flash}</div>}
       {error && <div className="adm-banner adm-banner-error" role="alert"><Icon name="alert" size={15} /> {error}</div>}
+      {importContext?.notes.length > 0 && (
+        <div className="adm-info adm-import-notes">
+          <Icon name="info" size={15} />
+          <dl>
+            {importContext.notes.map((n, i) => (
+              <div key={i} className={n.warn ? 'adm-import-warn' : ''}>
+                {n.label && <dt>{n.label}</dt>}
+                <dd>
+                  {n.text}
+                  {n.href && <> <a className="adm-link" href={n.href} onClick={(e) => { e.preventDefault(); leave(n.href); }}>Open it</a></>}
+                </dd>
+              </div>
+            ))}
+          </dl>
+        </div>
+      )}
 
       <div className="adm-editor-grid">
         <div className="adm-editor-main">

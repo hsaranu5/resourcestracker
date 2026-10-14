@@ -42,6 +42,13 @@ landing outside a KC-metro bounding box.
 > started. Use Export CSV in the admin to get the current data. `npm run seed` refuses to
 > run once the admin has recorded edits, because it would overwrite them; `--force`
 > overrides that.
+>
+> Review workbooks (`data/review/*.xlsx`) go in through **Import** in the admin: load the
+> file, and its New places and Changes tabs become lists you can add in one go or open one
+> row at a time, already filled in. The Decision column is respected; blank rows start
+> selected only when recommended Approve. Rows already in the catalogue are recognised, so
+> loading a workbook twice doesn't duplicate anything. Afterwards, Resources → No map pin →
+> Look up all places the new addresses on the map.
 
 Then reseed the server if you're using it:
 

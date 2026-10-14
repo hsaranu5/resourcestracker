@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import Icon from '../../icons';
 import { categoryOf } from '../../lib';
 import { api, errorText, isExpired, isVerified, needsPin } from './adminApi';
@@ -15,7 +15,7 @@ const FILTERS = [
     key: 'nopin',
     label: 'No map pin',
     test: needsPin,
-    banner: "These have a street address but no coordinates, so they're in the list but not on the map. Open one and use Look up address."
+    banner: "These have a street address but no coordinates, so they're in the list but not on the map. Look them all up at once, or open one to set its pin by hand."
   }
 ];
 
@@ -39,6 +39,21 @@ const downloadCsv = (rows) => {
   URL.revokeObjectURL(url);
 };
 
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+// The server allows one address lookup a second across the whole team
+// (adminController.geocode); 429 means someone else got there first.
+const geocodeRow = async (r) => {
+  for (let attempt = 0; ; attempt += 1) {
+    try {
+      return await api.geocode({ address: r.address, city: r.city, state: r.state, zip: r.zip_code });
+    } catch (err) {
+      if (err?.response?.status !== 429 || attempt >= 4) throw err;
+      await sleep(1500);
+    }
+  }
+};
+
 const matches = (r, q) =>
   !q || [r.name, r.organization, r.address, r.zip_code, r.services, r.hours]
     .some((v) => String(v || '').toLowerCase().includes(q));
@@ -48,7 +63,12 @@ const ResourcesPage = ({ go, onExpired, flash }) => {
   const [rows, setRows] = useState(null);
   const [error, setError] = useState('');
   const [query, setQuery] = useState('');
-  const [filter, setFilter] = useState('all');
+  const [filter, setFilter] = useState(() => {
+    const wanted = new URLSearchParams(window.location.search).get('filter');
+    return FILTERS.some((f) => f.key === wanted) ? wanted : 'all';
+  });
+  const [pins, setPins] = useState(null); // { done, total, found, missed, running }
+  const stopPins = useRef(false);
 
   useEffect(() => {
     api.resources()
@@ -67,6 +87,31 @@ const ResourcesPage = ({ go, onExpired, flash }) => {
   const open = (e, path) => {
     e.preventDefault();
     go(path);
+  };
+
+  // Every address in the No map pin queue, one at a time. Misses stay in the
+  // queue for someone to place by hand.
+  const lookUpPins = async () => {
+    const queue = rows.filter(needsPin);
+    const tally = { done: 0, total: queue.length, found: 0, missed: 0, running: true };
+    stopPins.current = false;
+    setPins({ ...tally });
+    for (const r of queue) {
+      if (stopPins.current) break;
+      try {
+        const hit = await geocodeRow(r);
+        const saved = await api.updateResource(r.id, { ...r, latitude: hit.latitude, longitude: hit.longitude });
+        setRows((list) => list.map((x) => (x.id === saved.id ? saved : x)));
+        tally.found += 1;
+      } catch (err) {
+        if (isExpired(err)) return onExpired();
+        tally.missed += 1;
+      }
+      tally.done += 1;
+      setPins({ ...tally });
+      await sleep(1100);
+    }
+    setPins({ ...tally, running: false });
   };
 
   return (
@@ -114,8 +159,30 @@ const ResourcesPage = ({ go, onExpired, flash }) => {
         <span className="adm-count">{rows ? `Showing ${shown.length} of ${rows.length}` : ''}</span>
       </div>
 
-      {active.banner && counts[filter] > 0 && (
-        <div className="adm-banner"><Icon name="alert" size={15} /> {active.banner}</div>
+      {active.banner && (counts[filter] > 0 || pins) && (
+        <div className="adm-banner">
+          <Icon name="alert" size={15} />
+          <span>
+            {active.banner}
+            {filter === 'nopin' && (
+              <span className="adm-pins">
+                {pins && (
+                  <span>
+                    {pins.running ? `Looking up ${Math.min(pins.done + 1, pins.total)} of ${pins.total}… ` : ''}
+                    {pins.found} placed{pins.missed ? `, ${pins.missed} not found. Open those and set the pin by hand.` : '.'}
+                  </span>
+                )}
+                {pins?.running
+                  ? <button className="adm-btn" onClick={() => { stopPins.current = true; }}>Stop</button>
+                  : counts.nopin > 0 && (
+                    <button className="adm-btn" onClick={lookUpPins}>
+                      <Icon name="pin" size={14} /> Look up all {counts.nopin}
+                    </button>
+                  )}
+              </span>
+            )}
+          </span>
+        </div>
       )}
 
       {error && <p className="adm-error">{error}</p>}
