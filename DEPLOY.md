@@ -10,7 +10,11 @@ Both are on free plans:
 - **Supabase Free** pauses a project after a week without activity. A paused
   project refuses connections, so the whole API returns 500 until someone
   restores it from the dashboard. The daily cron touches the database and may
-  keep it awake, but Supabase doesn't promise that.
+  keep it awake, but Supabase doesn't promise that, so a GitHub Actions
+  workflow (`.github/workflows/supabase-keepalive.yml`) also queries it once a
+  day. It needs the repository secret `DATABASE_URL` (either pooler string):
+  GitHub → Settings → Secrets and variables → Actions. Then Actions →
+  **Supabase keep-alive** → **Run workflow**, and it should go green.
 - **Vercel Hobby** is for non-commercial use only, and runs crons at most once
   a day, to the hour.
 

@@ -1,0 +1,39 @@
+# One small Postgres query a day, so the Free-plan Supabase project is never
+# idle long enough to be paused (about a week without activity). The Vercel
+# crons touch the database too, but Supabase doesn't promise that counts.
+#
+# Connects with DATABASE_URL, not the Data API: server/schema.sql locks the
+# public schema out of PostgREST. A failed run means the project is paused or
+# the secret is wrong; GitHub emails whoever owns the workflow. Retire this if
+# the project moves to a paid plan. See DEPLOY.md.
+name: Supabase keep-alive
+
+on:
+  schedule:
+    # 12:17 UTC daily. GitHub may start scheduled runs late.
+    - cron: "17 12 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Query the resources table
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          PGSSLMODE: require
+          PGCONNECT_TIMEOUT: "20"
+        run: |
+          if [ -z "$DATABASE_URL" ]; then
+            echo "::error::Set the DATABASE_URL repository secret."
+            exit 1
+          fi
+          for attempt in 1 2 3; do
+            psql "$DATABASE_URL" -tAc "SELECT count(*) FROM resources" && exit 0
+            sleep 10
+          done
+          exit 1
